@@ -1,49 +1,52 @@
 import React from 'react';
+import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const TopNav: React.FC = () => {
-    return (
-        <nav style={styles.nav}>
-            <img src='/../../../assets/icons/logo.png' style={styles.logo} alt="Logo"></img>
-            <ul style={styles.navLinks}>
-                <li style={styles.navItem}><a href="#home" style={styles.navLink}>Streak</a></li>
-                <li style={styles.navItem}><a href="#about" style={styles.navLink}>Dropdown</a></li>
-                <li style={styles.navItem}><a href="#contact" style={styles.navLink}>User</a></li>
-            </ul>
-        </nav>
-    );
+  return (
+    <View style={styles.nav}>
+        <Image source={require('../../assets/icons/logo.png')} style={styles.logo} />
+        <View style={styles.navLinks}>
+            <TouchableOpacity style={styles.navItem}>
+                <Text style={styles.navLink}>Streak</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem}>
+                <Text style={styles.navLink}>Dropdown</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem}>
+                <Text style={styles.navLink}>User</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+  );
 };
 
-const styles = {
+const styles = StyleSheet.create({
     nav: {
-        display: 'flex',
+        flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '10px 20px',
-        paddingRight: '200px',
-        paddingLeft: '200px',
-        backgroundColor: '#333',
-        color: '#fff',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: '#FFFFFF',
         width: '100%',
-        height: '40px',
+        borderBottomWidth: 1,
+        borderBottomColor: '#D9D9D9',
     },
     logo: {
-        fontSize: '1.5rem',
-        fontWeight: 'bold',
+        width: '30vh',
+        maxHeight: 40,
+        resizeMode: 'contain',
     },
     navLinks: {
-        listStyle: 'none',
-        display: 'flex',
-        margin: 0,
-        padding: 0,
+        flexDirection: 'row',
     },
     navItem: {
-        marginLeft: '20px',
+        marginLeft: 20,
     },
     navLink: {
-        color: '#fff',
-        textDecoration: 'none',
-        fontSize: '1rem',
+        color: '#545454',
+        fontSize: 16,
     },
-};
+});
 
 export default TopNav;

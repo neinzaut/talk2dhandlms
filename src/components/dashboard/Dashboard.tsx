@@ -1,40 +1,60 @@
-import SideNav from "../common/SideNav";
-import TopNav from "../common/TopNav";
-import Leaderboard from "./Leaderboard";
+import React from 'react';
+import { View, StyleSheet, ImageBackground } from 'react-native';
+import SideNav from '../common/SideNav';
+import TopNav from '../common/TopNav';
+import Leaderboard from './Leaderboard';
+import MainContent from './MainContent';
+import bgPattern from '../../assets/icons/bgpattern.png';
 
 export function Dashboard() {
     return (
-        <>
-            <div style={mainDiv}>
-                <TopNav />
-            </div>
-            <div style={sideDiv}>
-                <SideNav />
-                <Leaderboard />
-            </div>
-        </>
+        <ImageBackground
+            source={bgPattern}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            <View style={styles.container}>
+                <View style={styles.top}>
+                    <TopNav />
+                </View>
+                <View style={styles.content}>
+                    <SideNav />
+                    <View style={styles.main}>
+                        <MainContent />
+                    </View>
+                    <Leaderboard />
+                </View>
+            </View>
+        </ImageBackground>
     );
 }
 
-import { CSSProperties } from "react";
+const styles = StyleSheet.create({
+    background: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: 'transparent',
+    },
+    top: {
+        height: 60,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        zIndex: 1,
+    },
+    content: {
+        flexDirection: 'row',
+        flex: 1,
+    },
+    main: {
+        flex: 1,
+        paddingHorizontal: 10,
+        paddingTop: 10,
+        backgroundColor: 'transparent',
+    },
+});
 
-const mainDiv: CSSProperties = {
-    width: "100%",
-    display: "flex", // Use flex to position children
-    flexDirection: "row", // Align children in a row
-    justifyContent: "space-between", // Space between TopNav and SideNav
-    alignItems: "center",
-    backgroundColor: "#fff",
-    userSelect: "none",
-};
-
-const sideDiv: CSSProperties = {
-    height: "100vh",
-    width: "4vh", // Adjust width as needed
-    display: "flex", // Use flex to stack items
-    flexDirection: "column", // Stack items vertically
-    justifyContent: "flex-start", // Align items to the top
-    alignItems: "center",
-    backgroundColor: "#fff",
-    userSelect: "none",
-};
+export default Dashboard;
