@@ -71,14 +71,35 @@
 
 // export default App;
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import * as Font from 'expo-font';
+import CustomText from './src/assets/fonts/Fredoka.ttf';
 import { Dashboard } from './src/components/dashboard/Dashboard';
 
-function App() {
+export default function App() {
+    const [fontsLoaded, setFontsLoaded] = useState(false);
+
+    useEffect(() => {
+        async function loadFonts() {
+            await Font.loadAsync({
+                'CustomFont': require('./src/assets/fonts/Fredoka.ttf'),
+            });
+            setFontsLoaded(true);
+        }
+        loadFonts();
+    }, []);
+
+    if (!fontsLoaded) {
+        return null; 
+    }
+
     return (
-        <div>
+        <View>
+            <CustomText style={{ fontSize: 20 }}>Hello, World!</CustomText>
             <Dashboard />
-        </div>
+        </View>
+        
     );
 }
 

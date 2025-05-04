@@ -5,27 +5,30 @@ import TopNav from '../common/TopNav';
 import Leaderboard from './Leaderboard';
 import MainContent from './MainContent';
 import bgPattern from '../../assets/icons/bgpattern.png';
+import { LanguageProvider } from '../common/LanguageContext';
 
 export function Dashboard() {
     return (
-        <ImageBackground
-            source={bgPattern}
-            style={styles.background}
-            resizeMode="cover"
-        >
-            <View style={styles.container}>
-                <View style={styles.top}>
-                    <TopNav />
-                </View>
-                <View style={styles.content}>
-                    <SideNav />
-                    <View style={styles.main}>
-                        <MainContent />
+        <LanguageProvider>
+            <ImageBackground
+                source={bgPattern}
+                style={styles.background}
+                resizeMode="cover"
+            >
+                <View style={styles.container}>
+                    <View style={styles.top}>
+                        <TopNav />
                     </View>
-                    <Leaderboard />
+                    <View style={styles.content} onStartShouldSetResponder={() => true}>
+                        <SideNav />
+                        <View style={styles.main}>
+                            <MainContent />
+                        </View>
+                        <Leaderboard />
+                    </View>
                 </View>
-            </View>
-        </ImageBackground>
+            </ImageBackground>
+        </LanguageProvider>
     );
 }
 
@@ -33,7 +36,6 @@ const styles = StyleSheet.create({
     background: {
         flex: 1,
         width: '100%',
-        height: '100%',
     },
     container: {
         flex: 1,
@@ -43,7 +45,7 @@ const styles = StyleSheet.create({
         height: 60,
         backgroundColor: '#fff',
         justifyContent: 'center',
-        zIndex: 1,
+        zIndex: 10,
     },
     content: {
         flexDirection: 'row',
@@ -51,8 +53,6 @@ const styles = StyleSheet.create({
     },
     main: {
         flex: 1,
-        paddingHorizontal: 10,
-        paddingTop: 10,
         backgroundColor: 'transparent',
     },
 });
