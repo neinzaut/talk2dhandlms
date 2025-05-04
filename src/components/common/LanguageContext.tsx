@@ -6,40 +6,50 @@ type SignLanguage = 'ASL' | 'FSL';
 interface LanguageContextType {
   selectedLanguage: SignLanguage;
   setSelectedLanguage: (language: SignLanguage) => Promise<void>;
+  currentModules: ModuleType[]; 
+  refreshModules: () => void; 
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [selectedLanguage, setSelectedLanguage] = useState<SignLanguage>('ASL');
+  const [modules, setModules] = useState<ModuleType[]>([]);
 
-  useEffect(() => {
-    const loadLanguage = async () => {
-      try {
-        const savedLanguage = await AsyncStorage.getItem('selectedLanguage');
-        if (savedLanguage === 'ASL' || savedLanguage === 'FSL') {
-          setSelectedLanguage(savedLanguage);
-        }
-      } catch (error) {
-        console.error('Failed to load language', error);
-      }
-    };
-    loadLanguage();
-  }, []);
+  const loadModules = async (language: SignLanguage) => {
+    // Fetch modules based on language
+    const langModules = await fetchModulesForLanguage(language);
+    setModules(langModules);
+  };
 
   const updateLanguage = async (language: SignLanguage) => {
     try {
       await AsyncStorage.setItem('selectedLanguage', language);
       setSelectedLanguage(language);
+      await loadModules(language); // Reload modules when language changes
     } catch (error) {
       console.error('Failed to save language', error);
     }
   };
 
+  useEffect(() => {
+    const initialize = async () => {
+      const savedLanguage = await AsyncStorage.getItem('selectedLanguage');
+      if (savedLanguage === 'ASL' || savedLanguage === 'FSL') {
+        await updateLanguage(savedLanguage);
+      } else {
+        await loadModules(selectedLanguage);
+      }
+    };
+    initialize();
+  }, []);
+
   return (
     <LanguageContext.Provider value={{ 
       selectedLanguage, 
-      setSelectedLanguage: updateLanguage 
+      setSelectedLanguage: updateLanguage,
+      currentModules: modules,
+      refreshModules: () => loadModules(selectedLanguage)
     }}>
       {children}
     </LanguageContext.Provider>

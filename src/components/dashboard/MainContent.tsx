@@ -4,6 +4,7 @@ import { LessonItem } from '../lessons/LessonItem';
 import { useLessons } from '../../hooks/useLessons';
 import { useNavigation } from '@react-navigation/native';
 import { useLanguage } from '../common/LanguageContext';
+import { ModuleScreen } from '../lessons/ModuleScreen';
 
 const MainContent: React.FC = () => {
   const { selectedLanguage } = useLanguage();
@@ -22,6 +23,7 @@ const MainContent: React.FC = () => {
       ? 'American Sign Language' 
       : 'Filipino Sign Language';
   };
+
 
   return (
     <ScrollView
@@ -68,19 +70,19 @@ const MainContent: React.FC = () => {
       )}
 
       {/* All Lessons */}
-      <Text style={styles.title}>{getLanguageName()} Lessons</Text>
-      <View style={styles.lessonsList}>
-        {lessons.map((lesson) => (
-          <LessonItem
-            key={lesson.id}
-            title={lesson.title}
-            image={lesson.image}
-            sublessons={lesson.sublessons}
-            overallProgress={lesson.overallProgress}
-            onPress={() => handleLessonPress(lesson.id)}
-          />
-        ))}
-      </View>
+    <Text style={styles.title}>{getLanguageName()} Lessons</Text>
+    <View style={styles.lessonsList}>
+      {lessons.map((lesson) => (
+        <LessonItem
+        key={lesson.id}
+        title={lesson.title}
+        image={lesson.image}
+        sublessons={lesson.sublessons}
+        overallProgress={lesson.overallProgress}
+        onPress={() => handleLessonPress(lesson.id)}
+        />
+      ))}
+    </View>
     </ScrollView>
   );
 };
