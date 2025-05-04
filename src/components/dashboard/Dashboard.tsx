@@ -19,7 +19,7 @@ export function Dashboard() {
                     <View style={styles.top}>
                         <TopNav />
                     </View>
-                    <View style={styles.content} onStartShouldSetResponder={() => true}>
+                    <View style={styles.content}>
                         <SideNav />
                         <View style={styles.main}>
                             <MainContent />

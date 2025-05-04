@@ -1,26 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import type { Lesson } from './lessonTypes';
+
+interface Sublesson {
+  title: string;
+  progress: number;
+}
 
 interface LessonItemProps {
-  lesson: Lesson;
+  title: string;
+  image: any;
+  sublessons: Sublesson[];
+  overallProgress: number;
   onPress?: () => void;
   isCurrent?: boolean;
 }
 
 export const LessonItem: React.FC<LessonItemProps> = ({ 
-  lesson,
-  onPress = () => {},
+  title, 
+  image, 
+  sublessons, 
+  overallProgress,
+  onPress,
   isCurrent = false
 }) => {
-  // Destructure with safe defaults
-  const {
-    title = 'Untitled Lesson',
-    image = require('../../assets/icons/lesson1-preview.png'),
-    sublessons = [],
-    overallProgress = 0
-  } = lesson;
-
   return (
     <TouchableOpacity 
       style={[
@@ -36,7 +38,6 @@ export const LessonItem: React.FC<LessonItemProps> = ({
           source={image} 
           style={styles.lessonImage} 
           resizeMode="contain"
-          defaultSource={require('../../assets/icons/lesson1-preview.png')}
         />
         <View style={styles.lessonTextContainer}>
           <Text style={styles.lessonTitle}>{title}</Text>
@@ -49,54 +50,49 @@ export const LessonItem: React.FC<LessonItemProps> = ({
         </View>
       </View>
 
-      {sublessons.length > 0 && (
-        <View style={styles.sublessonsContainer}>
-          {sublessons.map((sublesson) => (
-            <TouchableOpacity 
-              key={sublesson.id}
-              style={styles.sublessonItem}
-              activeOpacity={0.7}
-              onPress={() => {}}
-              onStartShouldSetResponder={() => true}
-            >
-              <View style={styles.sublessonLeft}>
-                <View style={[
-                  styles.sublessonIcon,
-                  sublesson.progress === 100 && styles.completedIcon,
-                  sublesson.progress > 0 && styles.inProgressIcon
-                ]}>
-                  {sublesson.progress === 100 ? (
-                    <Text style={styles.checkmark}>✓</Text>
-                  ) : (
-                    <Text style={styles.sublessonNumber}>
-                      {sublessons.findIndex(s => s.id === sublesson.id) + 1}
-                    </Text>
-                  )}
-                </View>
-                <Text 
-                  style={styles.sublessonTitle}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {sublesson.title}
-                </Text>
+      <View style={styles.sublessonsContainer}>
+        {sublessons.map((sublesson, index) => (
+          <TouchableOpacity 
+            key={`sublesson-${index}`} 
+            style={styles.sublessonItem}
+            activeOpacity={0.7}
+            onPress={() => {}}
+            onStartShouldSetResponder={() => true}
+          >
+            <View style={styles.sublessonLeft}>
+              <View style={[
+                styles.sublessonIcon,
+                sublesson.progress === 100 && styles.completedIcon,
+                sublesson.progress > 0 && styles.inProgressIcon
+              ]}>
+                {sublesson.progress === 100 ? (
+                  <Text style={styles.checkmark}>✓</Text>
+                ) : (
+                  <Text style={styles.sublessonNumber}>{index + 1}</Text>
+                )}
               </View>
-              <View style={styles.sublessonProgress}>
-                <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${sublesson.progress}%` }]} />
-                </View>
-                <Text style={styles.sublessonProgressText}>
-                  {sublesson.progress}%
-                </Text>
+              <Text 
+                style={styles.sublessonTitle}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {sublesson.title}
+              </Text>
+            </View>
+            <View style={styles.sublessonProgress}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${sublesson.progress}%` }]} />
               </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+              <Text style={styles.sublessonProgressText}>
+                {sublesson.progress}%
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
     </TouchableOpacity>
   );
 };
-
 
 const styles = StyleSheet.create({
   card: {
