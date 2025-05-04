@@ -1,13 +1,14 @@
 import React, { useState, useRef, useContext } from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import DropdownMenu from './DropdownMenu';
-import { LanguageContext } from './LanguageContext';
+//import LanguageContext from './LanguageContext';
+import { useLanguage } from './LanguageContext';
 import UserDropdown from './UserDropdown';
 
 type SignLanguage = 'ASL' | 'FSL';
 
 const TopNav: React.FC = () => {
-  const { selectedLanguage, setSelectedLanguage } = useContext(LanguageContext);
+  const { selectedLanguage, setSelectedLanguage } = useLanguage();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const dropdownRef = useRef<View>(null);
 

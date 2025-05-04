@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'row',
         flex: 1,
+        height: '100%',
+        backgroundColor: 'transparent',
     },
     main: {
         flex: 1,

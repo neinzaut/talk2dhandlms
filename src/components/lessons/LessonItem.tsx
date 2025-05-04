@@ -50,6 +50,8 @@ export const LessonItem: React.FC<LessonItemProps> = ({
         </View>
       </View>
 
+      {/* SUBLESSONS CONTAINER - will revisit later ; tanggal muna kc scroll issues */}
+{/* 
       <View style={styles.sublessonsContainer}>
         {sublessons.map((sublesson, index) => (
           <TouchableOpacity 
@@ -89,7 +91,7 @@ export const LessonItem: React.FC<LessonItemProps> = ({
             </View>
           </TouchableOpacity>
         ))}
-      </View>
+      </View> */}
     </TouchableOpacity>
   );
 };
@@ -99,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 16,
     borderRadius: 8,
-    marginBottom: 16,
+    // marginBottom: 16,
     width: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

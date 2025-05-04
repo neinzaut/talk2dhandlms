@@ -3,13 +3,24 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { LessonItem } from '../lessons/LessonItem';
 import { useLessons } from '../../hooks/useLessons';
 import { useNavigation } from '@react-navigation/native';
+import { useLanguage } from '../common/LanguageContext';
 
 const MainContent: React.FC = () => {
-  const { lessons } = useLessons();
+  const { selectedLanguage } = useLanguage();
+  const { lessons } = useLessons(selectedLanguage);
   const navigation = useNavigation();
 
   const handleLessonPress = (lessonId: string) => {
-    navigation.navigate('ModuleScreen', { lessonId });
+    navigation.navigate('ModuleScreen', { 
+      lessonId,
+      language: selectedLanguage 
+    });
+  };
+
+  const getLanguageName = () => {
+    return selectedLanguage === 'ASL' 
+      ? 'American Sign Language' 
+      : 'Filipino Sign Language';
   };
 
   return (
@@ -26,37 +37,38 @@ const MainContent: React.FC = () => {
           style={[styles.currentLessonCard, { borderTopColor: '#4EC6FF', borderTopWidth: 4 }]}
           onPress={() => handleLessonPress(lessons[0].id)}
         >
-            <View style={styles.cardHeader}>
-              <View style={styles.textContainer}>
-                <Text style={styles.cardTitle}>Current Lesson</Text>
-                <Text style={styles.subtitle}>{lessons[0].sublessons[0].title}</Text>
-              </View>
-              <View style={styles.progressContainer}>
-                <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${lessons[0].sublessons[0].progress}%` }]}>
-                    <Text style={styles.progressText}>{lessons[0].sublessons[0].progress}%</Text>
-                  </View>
+          <View style={styles.cardHeader}>
+            <View style={styles.textContainer}>
+              <Text style={styles.cardTitle}>Current {getLanguageName()} Lesson</Text>
+              <Text style={styles.subtitle}>{lessons[0].sublessons[0].title}</Text>
+            </View>
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${lessons[0].sublessons[0].progress}%` }]}>
+                  <Text style={styles.progressText}>{lessons[0].sublessons[0].progress}%</Text>
                 </View>
               </View>
             </View>
+          </View>
 
-            <View style={styles.cardFooter}>
-              <View>
-                <Text style={[styles.subtitle, { marginTop: 8 }]}>
-                  Already know this?
-                </Text>
-                <Text style={styles.content}>
-                  Take the Module Test to skip the course.
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Answer</Text>
-              </TouchableOpacity>
+          <View style={styles.cardFooter}>
+            <View>
+              <Text style={[styles.subtitle, { marginTop: 8 }]}>
+                Already know this?
+              </Text>
+              <Text style={styles.content}>
+                Take the Module Test to skip the course.
+              </Text>
             </View>
-          </TouchableOpacity>
-        )}
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>Answer</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      )}
 
-        {/* All Lessons */}
+      {/* All Lessons */}
+      <Text style={styles.title}>{getLanguageName()} Lessons</Text>
       <View style={styles.lessonsList}>
         {lessons.map((lesson) => (
           <LessonItem
@@ -73,19 +85,19 @@ const MainContent: React.FC = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
+    height: '100%',
+    justifyContent: 'flex-start',
   },
   scrollContainer: {
     flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 40, // Extra space at bottom
   },
   title: {
     fontSize: 18,

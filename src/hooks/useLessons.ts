@@ -1,43 +1,43 @@
+// src/hooks/useLessons.ts
 import { useState } from 'react';
-import type { Lesson, Sublesson } from '../components/lessons/lessonTypes';
+import type { Lesson, Sublesson } from '../../src/components/lessons/lessonTypes';
 
-export const useLessons = () => {
-  const [lessons, setLessons] = useState<Lesson[]>([
-    {
-      id: '1',
-      title: "Lesson 1: Basics of American Sign Language",
-      image: require('../assets/icons/lesson1-preview.png'),
-      sublessons: [
-        { id: '1-1', title: "Alphabet", progress: 70 },
-        { id: '1-2', title: "Numbers", progress: 30 },
-        { id: '1-3', title: "Finger Spelling", progress: 10 },
-        { id: '1-4', title: "Module Test", progress: 0 }
-      ],
-      overallProgress: 30
-    },
-    {
-      id: '2',
-      title: "Lesson 2: Intermediate ASL",
-      image: require('../assets/icons/lesson2-preview.png'),
-      sublessons: [
-        { id: '2-1', title: "Dynamic Gestures", progress: 0 },
-        { id: '2-2', title: "Common Phrases", progress: 0 },
-        { id: '2-3', title: "Module Test", progress: 0 }
-      ],
-      overallProgress: 0
-    },
-    {
-      id: '3',
-      title: "Lesson 3: Advanced ASL",
-      image: require('../assets/icons/lesson3-preview.png'),
-      sublessons: [
-        { id: '2-1', title: "Grammar", progress: 0 },
-        { id: '2-2', title: "Sentences", progress: 0 },
-        { id: '2-3', title: "Simulation Test", progress: 0 }
-      ],
-      overallProgress: 0
-    }
-  ]);
+const ASL_LESSONS: Lesson[] = [
+  {
+    id: 'asl-1',
+    title: "Lesson 1: Basics of American Sign Language",
+    image: require('../assets/icons/lesson1-preview.png'),
+    sublessons: [
+      { id: 'asl-1-1', title: "ASL Alphabet", progress: 70 },
+      { id: 'asl-1-2', title: "ASL Numbers", progress: 30 },
+      { id: 'asl-1-3', title: "ASL Finger Spelling", progress: 10 },
+      { id: 'asl-1-4', title: "ASL Module Test", progress: 0 }
+    ],
+    overallProgress: 30
+  },
+  // Add more ASL lessons...
+];
+
+const FSL_LESSONS: Lesson[] = [
+  {
+    id: 'fsl-1',
+    title: "Lesson 1: Basics of Filipino Sign Language",
+    image: require('../assets/icons/lesson1-preview.png'),
+    sublessons: [
+      { id: 'fsl-1-1', title: "FSL Alphabet", progress: 40 },
+      { id: 'fsl-1-2', title: "FSL Numbers", progress: 20 },
+      { id: 'fsl-1-3', title: "FSL Basic Signs", progress: 5 },
+      { id: 'fsl-1-4', title: "FSL Module Test", progress: 0 }
+    ],
+    overallProgress: 20
+  },
+  // Add more FSL lessons...
+];
+
+export const useLessons = (language: 'ASL' | 'FSL') => {
+  const [lessons, setLessons] = useState<Lesson[]>(
+    language === 'ASL' ? ASL_LESSONS : FSL_LESSONS
+  );
 
   const updateLessonProgress = (lessonId: string, sublessonId: string, newProgress: number) => {
     setLessons(prevLessons => 

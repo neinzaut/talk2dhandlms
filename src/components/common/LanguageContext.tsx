@@ -1,17 +1,14 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SignLanguage = 'ASL' | 'FSL';
 
 interface LanguageContextType {
   selectedLanguage: SignLanguage;
-  setSelectedLanguage: (language: SignLanguage) => void;
+  setSelectedLanguage: (language: SignLanguage) => Promise<void>;
 }
 
-export const LanguageContext = createContext<LanguageContextType>({
-  selectedLanguage: 'ASL',
-  setSelectedLanguage: () => {},
-});
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [selectedLanguage, setSelectedLanguage] = useState<SignLanguage>('ASL');
@@ -40,8 +37,20 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
   };
 
   return (
-    <LanguageContext.Provider value={{ selectedLanguage, setSelectedLanguage: updateLanguage }}>
+    <LanguageContext.Provider value={{ 
+      selectedLanguage, 
+      setSelectedLanguage: updateLanguage 
+    }}>
       {children}
     </LanguageContext.Provider>
   );
+};
+
+// Add this hook export
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
 };

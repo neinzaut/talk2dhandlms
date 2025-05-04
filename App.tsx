@@ -70,12 +70,16 @@
 // }
 
 // export default App;
-
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import * as Font from 'expo-font';
-import CustomText from './src/assets/fonts/Fredoka.ttf';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Dashboard } from './src/components/dashboard/Dashboard';
+import { LanguageProvider } from './src/components/common/LanguageContext';
+
+// Create stack navigator
+const Stack = createStackNavigator();
 
 export default function App() {
     const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -83,7 +87,7 @@ export default function App() {
     useEffect(() => {
         async function loadFonts() {
             await Font.loadAsync({
-                'CustomFont': require('./src/assets/fonts/Fredoka.ttf'),
+                'Fredoka': require('./src/assets/fonts/Fredoka.ttf'),
             });
             setFontsLoaded(true);
         }
@@ -91,19 +95,21 @@ export default function App() {
     }, []);
 
     if (!fontsLoaded) {
-        return null; 
+        return null; // Or a loading screen
     }
 
     return (
-        <View>
-            <CustomText style={{ fontSize: 20 }}>Hello, World!</CustomText>
-            <Dashboard />
-        </View>
-        
+        <LanguageProvider>
+            <NavigationContainer>
+                <Stack.Navigator>
+                    <Stack.Screen 
+                        name="Dashboard" 
+                        component={Dashboard}
+                        options={{ headerShown: false }}
+                    />
+                    {/* Add other screens here as needed */}
+                </Stack.Navigator>
+            </NavigationContainer>
+        </LanguageProvider>
     );
 }
-
-export default App;
-
-
-
