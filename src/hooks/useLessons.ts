@@ -15,7 +15,8 @@ const ASL_LESSONS: Lesson[] = [
       { id: 'asl-1-3', title: "ASL Finger Spelling", progress: 10 },
       { id: 'asl-1-4', title: "ASL Module Test", progress: 0 }
     ],
-    overallProgress: 30
+    overallProgress: 30, 
+    language: 'ASL',
   },
   {
     id: 'asl-2',
@@ -26,7 +27,9 @@ const ASL_LESSONS: Lesson[] = [
       { id: 'asl-2-2', title: "Common Phrases", progress: 30 },
       { id: 'asl-2-3', title: "Module Test", progress: 0 },
     ],
-    overallProgress: 0
+    overallProgress: 0,
+    language: 'ASL',
+
   },
   {
     id: 'asl-3',
@@ -37,7 +40,9 @@ const ASL_LESSONS: Lesson[] = [
       { id: 'asl-3-2', title: "Conversation Simulation", progress: 30 },
       { id: 'asl-3-3', title: "Module Test", progress: 0 },
     ],
-    overallProgress: 0
+    overallProgress: 0,
+    language: 'ASL',
+
   },
 ];
 
@@ -52,7 +57,9 @@ const FSL_LESSONS: Lesson[] = [
       { id: 'fsl-1-3', title: "Finger Spelling", progress: 10 },
       { id: 'fsl-1-4', title: "Module Test", progress: 0 }
     ],
-    overallProgress: 30
+    overallProgress: 30,
+    language: 'FSL',
+
   },
   {
     id: 'fsl-2',
@@ -63,7 +70,9 @@ const FSL_LESSONS: Lesson[] = [
       { id: 'fsl-2-2', title: "Localized Terms & Common Phrases", progress: 30 },
       { id: 'fsl-2-3', title: "Module Test", progress: 0 },
     ],
-    overallProgress: 0
+    overallProgress: 0,
+    language: 'FSL',
+
   },
   {
     id: 'fsl-3',
@@ -74,10 +83,13 @@ const FSL_LESSONS: Lesson[] = [
       { id: 'fsl-3-2', title: "Conversation Simulation", progress: 30 },
       { id: 'fsl-3-3', title: "Module Test", progress: 0 },
     ],
-    overallProgress: 0
+    overallProgress: 0,
+    language: 'FSL',
+
   },
 ];
 
+// SWITCH BETWEEN ASL AND FSL LESSONS
 export const useLessons = (language: 'ASL' | 'FSL') => {
 
   // Store both sets of lessons in state
@@ -88,6 +100,9 @@ export const useLessons = (language: 'ASL' | 'FSL') => {
 
   // Get the current language's lessons
   const lessons = allLessons[language];
+  
+  // Add state setter for lessons
+  const [, setLessons] = useState(allLessons[language]);
 
   const updateLessonProgress = (lessonId: string, sublessonId: string, newProgress: number) => {
     setLessons(prevLessons => 
@@ -114,5 +129,42 @@ export const useLessons = (language: 'ASL' | 'FSL') => {
     );
   };
 
-  return { lessons, updateLessonProgress };
+  // TRACK PROGRESS OF SUBLESSONS
+  const updateSublessonProgress = async (lessonId: string, sublessonId: string, progress: number) => {
+    setLessons(prevLessons => 
+      prevLessons.map(lesson => {
+        if (lesson.id === lessonId) {
+          const updatedSublessons = lesson.sublessons.map(sublesson => 
+            sublesson.id === sublessonId 
+              ? { ...sublesson, progress }
+              : sublesson
+          );
+          
+          // Calculate new overall progress
+          const newOverallProgress = updatedSublessons.reduce(
+            (sum, sub) => sum + sub.progress, 0
+          ) / updatedSublessons.length;
+          
+          return {
+            ...lesson,
+            sublessons: updatedSublessons,
+            overallProgress: Math.round(newOverallProgress)
+          };
+        }
+        return lesson;
+      })
+    );
+    
+    // Save to AsyncStorage - Import Storage if not already imported
+    // await Storage.setItem(
+    //   `progress-${lessonId}-${sublessonId}`,
+    //   progress.toString()
+    // );
+  };
+
+  return { 
+    lessons, 
+    updateLessonProgress,
+    updateSublessonProgress
+  };
 };

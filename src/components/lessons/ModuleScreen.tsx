@@ -5,6 +5,15 @@ import { useLessons } from '../../hooks/useLessons';
 import { LessonItem } from './LessonItem';
 import { useLanguage } from '../common/LanguageContext';
 
+import { SublessonType } from '../../types/lessonTypes';
+const createASLModule = (type: SublessonType) => {
+  const base = {
+    language: 'ASL',
+    assets: ASL_ASSETS[type] 
+  };
+  // ... return configured module
+};
+
 const ModuleScreen: React.FC = () => {
   const route = useRoute();
   const { lessonId } = route.params;
