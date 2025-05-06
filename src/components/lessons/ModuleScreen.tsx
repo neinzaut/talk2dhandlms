@@ -1,93 +1,199 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLessons } from '../../hooks/useLessons';
-import { LessonItem } from './LessonItem';
 import { useLanguage } from '../common/LanguageContext';
+import { Ionicons } from '@expo/vector-icons';
+import { SubLessonStatus } from '../../types/lessons';
+import { typography } from '../../constants/typography';
 
-import { SublessonType } from '../../types/lessonTypes';
-const createASLModule = (type: SublessonType) => {
-  const base = {
-    language: 'ASL',
-    assets: ASL_ASSETS[type] 
-  };
-  // ... return configured module
-};
+export const ModuleScreen: React.FC = () => {
+    const { moduleId, title } = useLocalSearchParams<{ moduleId: string; title: string }>();
+    const { selectedLanguage } = useLanguage();
+    const { lessons, loading, error } = useLessons(selectedLanguage);
+    const router = useRouter();
 
-const ModuleScreen: React.FC = () => {
-  const route = useRoute();
-  const { lessonId } = route.params;
-  const { selectedLanguage } = useLanguage();
-  const { lessons, updateLessonProgress } = useLessons(selectedLanguage);
-  
-  // Find the lesson matching both ID and language
-  const lesson = lessons.find(l => l.id === lessonId);
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
 
-  if (!lesson) {
-    return (
-      <View style={styles.container}>
-        <Text>Lesson not found</Text>
-      </View>
-    );
-  }
+    if (error) {
+        return (
+            <View style={styles.container}>
+                <Text>Error: {error}</Text>
+            </View>
+        );
+    }
 
-  return (
-    <View style={styles.container}>
-      <LessonItem 
-        title={lesson.title}
-        image={lesson.image}
-        sublessons={lesson.sublessons}
-        overallProgress={lesson.overallProgress}
-        isCurrent={false} // Or add logic to determine if this is current
-      />
-      
-      {/* Language-specific module content */}
-      <View style={styles.moduleContent}>
-        <Text style={styles.languageBadge}>
-          {selectedLanguage === 'ASL' 
-            ? 'American Sign Language' 
-            : 'Filipino Sign Language'}
-        </Text>
-        <Text style={styles.contentTitle}>{lesson.title}</Text>
+    const module = lessons.find(lesson => lesson.id === moduleId);
+
+    if (!module) {
+        return (
+            <View style={styles.container}>
+                <Text>Module not found</Text>
+            </View>
+        );
+    }
+
+    const calculateModuleProgress = (sublessons: Array<{ status: SubLessonStatus }>) => {
+        const totalSublessons = sublessons.length;
+        const completedSublessons = sublessons.filter(sub => sub.status === 'complete').length;
+        const inProgressSublessons = sublessons.filter(sub => sub.status === 'in-progress').length;
         
-        {/* Add your actual module content here */}
-        {selectedLanguage === 'ASL' ? (
-          <Text>ASL-specific content for this module...</Text>
-        ) : (
-          <Text>FSL-specific content for this module...</Text>
-        )}
-      </View>
-    </View>
-  );
+        // Calculate progress: completed sublessons count as 100%, in-progress count as 50%
+        const progress = ((completedSublessons + (inProgressSublessons * 0.5)) / totalSublessons) * 100;
+        return Math.round(progress);
+    };
+
+    const getStatusIcon = (status: SubLessonStatus) => {
+        switch (status) {
+            case 'complete':
+                return <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />;
+            case 'in-progress':
+                return <Ionicons name="time" size={24} color="#2196F3" />;
+            default:
+                return <Ionicons name="ellipse-outline" size={24} color="#9E9E9E" />;
+        }
+    };
+
+    const moduleProgress = calculateModuleProgress(module.sublessons);
+
+    return (
+        <ImageBackground 
+            source={require('../../assets/icons/bgpattern.png')}
+            style={styles.container}
+            resizeMode="cover"
+        >
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.header}>
+                    <Image source={module.image} style={styles.moduleImage} />
+                    <Text style={styles.title}>{module.title}</Text>
+                    <View style={styles.progressContainer}>
+                        <View style={styles.progressBarWrapper}>
+                            <View style={[styles.progressBar, { width: `${moduleProgress}%` }]} />
+                        </View>
+                        <Text style={styles.progressText}>{moduleProgress}%</Text>
+                    </View>
+                </View>
+
+                <View style={styles.sublessonsContainer}>
+                    {module.sublessons.map((sublesson) => (
+                        <TouchableOpacity
+                            key={sublesson.id}
+                            style={styles.sublessonCard}
+                            onPress={() => router.push({
+                                pathname: '/sublesson',
+                                params: {
+                                    moduleId: module.id,
+                                    sublessonId: sublesson.id,
+                                    title: sublesson.title,
+                                    language: selectedLanguage
+                                }
+                            })}
+                        >
+                            <View style={styles.sublessonInfo}>
+                                <Text style={styles.sublessonTitle}>{sublesson.title}</Text>
+                                <Text style={styles.sublessonType}>{sublesson.type}</Text>
+                            </View>
+                            <View style={styles.statusContainer}>
+                                {getStatusIcon(sublesson.status)}
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </ScrollView>
+        </ImageBackground>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  moduleContent: {
-    marginTop: 20,
-    padding: 15,
-    // backgroundColor: '#f8f9fa',
-    backgroundColor: '#FF6536',
-    borderRadius: 8,
-  },
-  languageBadge: {
-    backgroundColor: '#4EC6FF',
-    color: 'white',
-    padding: 5,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  contentTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
+    container: {
+        flex: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    header: {
+        padding: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    moduleImage: {
+        width: '100%',
+        height: 200,
+        borderRadius: 12,
+        marginBottom: 16,
+    },
+    title: {
+        ...typography.h1,
+        color: '#212529',
+        marginBottom: 8,
+    },
+    progressContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    progressBarWrapper: {
+        flex: 1,
+        height: 8,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    progressBar: {
+        height: '100%',
+        backgroundColor: '#4CAF50',
+    },
+    progressText: {
+        ...typography.label,
+        color: '#6c757d',
+        minWidth: 45,
+        textAlign: 'right',
+    },
+    sublessonsContainer: {
+        padding: 20,
+    },
+    sublessonCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    sublessonInfo: {
+        flex: 1,
+        marginRight: 16,
+    },
+    sublessonTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#212529',
+        marginBottom: 4,
+    },
+    sublessonType: {
+        fontSize: 14,
+        color: '#6c757d',
+        textTransform: 'capitalize',
+    },
+    statusContainer: {
+        marginLeft: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
-
-export default ModuleScreen;

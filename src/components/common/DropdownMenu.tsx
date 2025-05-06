@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
+import { typography } from '../../constants/typography';
 
 interface DropdownItem {
   icon: any;
@@ -80,8 +81,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   itemText: {
+    ...typography.bodyMedium,
     color: '#1f2937',
-    fontSize: 14,
     fontWeight: '500',
     flex: 1,
   },

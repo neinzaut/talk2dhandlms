@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { LessonItem } from '../lessons/LessonItem';
 import { useLessons } from '../../hooks/useLessons';
 import { useNavigation } from '@react-navigation/native';
 import { useLanguage } from '../common/LanguageContext';
 import { ModuleScreen } from '../lessons/ModuleScreen';
+import { typography } from '../../constants/typography';
 
 const MainContent: React.FC = () => {
   const { selectedLanguage } = useLanguage();
@@ -12,10 +13,21 @@ const MainContent: React.FC = () => {
   const navigation = useNavigation();
 
   const handleLessonPress = (lessonId: string) => {
-    navigation.navigate('ModuleScreen', { 
-      lessonId,
-      language: selectedLanguage 
-    });
+    navigation.navigate('LessonOverview', { lessonId });
+  };
+
+  const handleSubLessonPress = (lessonId: string, sublessonId: string, title: string) => {
+    // Only navigate to sign recognition for Alphabet and Numbers sublessons
+    if (sublessonId.endsWith('-1') || sublessonId.endsWith('-2')) {
+      navigation.navigate('SubLesson', {
+        sublessonId,
+        language: lessonId.startsWith('asl') ? 'ASL' : 'FSL',
+        title,
+      });
+    } else {
+      // Handle other sublessons (e.g., Finger Spelling, Module Test)
+      console.log('Navigate to other sublesson:', sublessonId);
+    }
   };
 
   const getLanguageName = () => {
@@ -80,6 +92,7 @@ const MainContent: React.FC = () => {
         sublessons={lesson.sublessons}
         overallProgress={lesson.overallProgress}
         onPress={() => handleLessonPress(lesson.id)}
+        onSubLessonPress={handleSubLessonPress}
         />
       ))}
     </View>
@@ -102,8 +115,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...typography.h3,
     marginBottom: 16,
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -129,12 +141,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...typography.h4,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    ...typography.bodyMedium,
     fontWeight: '600',
     color: '#555',
   },
@@ -173,7 +184,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    fontSize: 14,
+    ...typography.bodyMedium,
     color: '#666',
   },
   button: {
@@ -183,9 +194,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   buttonText: {
+    ...typography.button,
     color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
   lessonsList: {
     paddingHorizontal: 20,

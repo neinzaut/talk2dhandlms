@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Image, Text, StyleSheet, Pressable } from 'react-native';
+import { typography } from '../../constants/typography';
 
 interface UserDropdownProps {
   user: {
@@ -107,12 +108,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f3f4f6',
   },
   userName: {
+    ...typography.bodyMedium,
     color: '#111827',
-    fontSize: 14,
   },
   userEmail: {
+    ...typography.bodySmall,
     color: '#6b7280',
-    fontSize: 12,
     fontWeight: '500',
     marginTop: 2,
   },
@@ -124,8 +125,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   menuItemText: {
+    ...typography.bodyMedium,
     color: '#374151',
-    fontSize: 14,
   },
   signOutContainer: {
     paddingVertical: 8,
@@ -137,8 +138,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   signOutText: {
+    ...typography.bodyMedium,
     color: '#374151',
-    fontSize: 14,
   },
 });
 

@@ -2,6 +2,7 @@
 
 #temp files
 test.png
+.venv/
 
 # dependencies
 node_modules/

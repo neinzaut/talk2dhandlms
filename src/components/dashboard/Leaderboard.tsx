@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, SectionList, StyleSheet, useWindowDimensions } from 'react-native';
+import { typography } from '../../constants/typography';
 
 const Leaderboard: React.FC = () => {
     const { width } = useWindowDimensions();
@@ -22,7 +23,7 @@ const Leaderboard: React.FC = () => {
             {/* Total XP */}
             <View style={styles.section}>
                 <Text style={styles.subheader}>Total XP</Text>
-                <Text style={styles.value}>100 XP</Text>
+                <Text style={styles.value}>2,450 XP</Text>
             </View>
 
             {/* Leaderboard */}
@@ -31,9 +32,9 @@ const Leaderboard: React.FC = () => {
                     {
                         title: 'Leaderboard',
                         data: [
-                            { name: 'User1', score: 100, rankChange: 'up' },
-                            { name: 'User2', score: 90, rankChange: 'down' },
-                            { name: 'User3', score: 80, rankChange: '' },
+                            { name: 'User1', score: 2450, rankChange: 'up' },
+                            { name: 'User2', score: 2100, rankChange: 'down' },
+                            { name: 'User3', score: 1850, rankChange: '' },
                         ],
                     },
                 ]}
@@ -69,8 +70,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     logo: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        ...typography.h2,
         marginBottom: 10,
     },
     section: {
@@ -82,12 +82,12 @@ const styles = StyleSheet.create({
         borderColor: '#D9D9D9', // Border color
     },
     subheader: {
-        fontSize: 14,
+        ...typography.bodyMedium,
         color: '#666',
         marginBottom: 4,
     },
     value: {
-        fontSize: 16,
+        ...typography.bodyLarge,
         fontWeight: 'bold',
     },
     row: {
@@ -106,11 +106,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     name: {
-        fontSize: 16,
+        ...typography.bodyLarge,
         fontWeight: 'bold',
     },
     xp: {
-        fontSize: 14,
+        ...typography.bodyMedium,
         color: '#888',
     },
     rankChange: {
