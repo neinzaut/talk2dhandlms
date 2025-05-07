@@ -21,8 +21,28 @@ const ASL_LESSONS: Lesson[] = [
     title: "Lesson 1: Basics of American Sign Language",
     image: require('../assets/icons/lesson1-preview.png'),
     sublessons: [
-      { id: 'asl-1-1', title: "Alphabet", type: 'practice', status: 'in-progress', progress: 70 },
-      { id: 'asl-1-2', title: "ASL Numbers", type: 'practice', status: 'in-progress', progress: 30 },
+      { 
+        id: 'asl-1-1', 
+        title: "Alphabet", 
+        type: 'practice', 
+        status: 'in-progress', 
+        progress: 70,
+        content: {
+          signs: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+          signType: 'letter'
+        }
+      },
+      { 
+        id: 'asl-1-2', 
+        title: "ASL Numbers", 
+        type: 'practice', 
+        status: 'in-progress', 
+        progress: 30,
+        content: {
+          signs: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+          signType: 'number'
+        }
+      },
       { id: 'asl-1-3', title: "ASL Finger Spelling", type: 'practice', status: 'incomplete', progress: 10 },
       { id: 'asl-1-4', title: "ASL Module Test", type: 'test', status: 'incomplete', progress: 0 }
     ],
@@ -61,8 +81,28 @@ const FSL_LESSONS: Lesson[] = [
     title: "Lesson 1: Basics of Filipino Sign Language",
     image: require('../assets/icons/lesson1-preview.png'),
     sublessons: [
-      { id: 'fsl-1-1', title: "Alphabet", type: 'practice', status: 'in-progress', progress: 70 },
-      { id: 'fsl-1-2', title: "Numbers", type: 'practice', status: 'in-progress', progress: 30 },
+      { 
+        id: 'fsl-1-1', 
+        title: "Alphabet", 
+        type: 'practice', 
+        status: 'in-progress', 
+        progress: 70,
+        content: {
+          signs: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+          signType: 'letter'
+        }
+      },
+      { 
+        id: 'fsl-1-2', 
+        title: "Numbers", 
+        type: 'practice', 
+        status: 'in-progress', 
+        progress: 30,
+        content: {
+          signs: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+          signType: 'number'
+        }
+      },
       { id: 'fsl-1-3', title: "Finger Spelling", type: 'practice', status: 'incomplete', progress: 10 },
       { id: 'fsl-1-4', title: "Module Test", type: 'test', status: 'incomplete', progress: 0 }
     ],

@@ -1,4 +1,4 @@
-export type SignType = 'labelled' | 'unlabelled' | 'letter';
+export type SignType = 'labelled' | 'unlabelled' | 'letter' | 'number';
 
 export interface SignImage {
     path: any;
@@ -35,6 +35,19 @@ const signImageMap: Record<string, any> = {
     'asl-labelled-y': require('../assets/images/asl-labelled/y.png'),
     'asl-labelled-z': require('../assets/images/asl-labelled/z.png'),
 
+    // ASL Number Signs
+    'asl-labelled-0': require('../assets/images/asl-labelled/0.png'),
+    'asl-labelled-1': require('../assets/images/asl-labelled/1.png'),
+    'asl-labelled-2': require('../assets/images/asl-labelled/2.png'),
+    'asl-labelled-3': require('../assets/images/asl-labelled/3.png'),
+    'asl-labelled-4': require('../assets/images/asl-labelled/4.png'),
+    'asl-labelled-5': require('../assets/images/asl-labelled/5.png'),
+    'asl-labelled-6': require('../assets/images/asl-labelled/6.png'),
+    'asl-labelled-7': require('../assets/images/asl-labelled/7.png'),
+    'asl-labelled-8': require('../assets/images/asl-labelled/8.png'),
+    'asl-labelled-9': require('../assets/images/asl-labelled/9.png'),
+    'asl-labelled-10': require('../assets/images/asl-labelled/10.png'),
+
     // FSL Labelled Signs
     'fsl-labelled-a': require('../assets/images/fsl-labelled/a.png'),
     'fsl-labelled-b': require('../assets/images/fsl-labelled/b.png'),
@@ -62,11 +75,24 @@ const signImageMap: Record<string, any> = {
     'fsl-labelled-x': require('../assets/images/fsl-labelled/x.png'),
     'fsl-labelled-y': require('../assets/images/fsl-labelled/y.png'),
     'fsl-labelled-z': require('../assets/images/fsl-labelled/z.png'),
+
+    // FSL Number Signs
+    'fsl-labelled-0': require('../assets/images/fsl-labelled/0.png'),
+    'fsl-labelled-1': require('../assets/images/fsl-labelled/1.png'),
+    'fsl-labelled-2': require('../assets/images/fsl-labelled/2.png'),
+    'fsl-labelled-3': require('../assets/images/fsl-labelled/3.png'),
+    'fsl-labelled-4': require('../assets/images/fsl-labelled/4.png'),
+    'fsl-labelled-5': require('../assets/images/fsl-labelled/5.png'),
+    'fsl-labelled-6': require('../assets/images/fsl-labelled/6.png'),
+    'fsl-labelled-7': require('../assets/images/fsl-labelled/7.png'),
+    'fsl-labelled-8': require('../assets/images/fsl-labelled/8.png'),
+    'fsl-labelled-9': require('../assets/images/fsl-labelled/9.png'),
+    'fsl-labelled-10': require('../assets/images/fsl-labelled/10.png'),
 };
 
 export const getSignImage = (language: 'ASL' | 'FSL', sign: string, type: SignType): SignImage => {
     // For letters and numbers, return null as they don't have sign icons
-    if (type === 'letter') {
+    if (type === 'letter' || type === 'number') {
         return {
             path: null,
             meaning: sign

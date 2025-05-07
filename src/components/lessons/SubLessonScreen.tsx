@@ -21,10 +21,12 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLessons } from '../../hooks/useLessons';
 import { useLanguage } from '../common/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
-import { SubLessonStatus } from '../../types/lessons';
+import { SubLessonStatus, SubLesson } from '../../types/lessons';
 import { typography } from '../../constants/typography';
 import { SignRecognitionPractice } from '../practice/SignRecognitionPractice';
 import { getSignImages } from '../../utils/imageUtils';
+import { NumbersSubLesson } from './NumbersSubLesson';
+import { FingerSpellingSubLesson } from './FingerSpellingSubLesson';
 
 export const SubLessonScreen: React.FC = () => {
     const { moduleId, sublessonId, title } = useLocalSearchParams<{ moduleId: string; sublessonId: string; title: string }>();
@@ -129,6 +131,56 @@ export const SubLessonScreen: React.FC = () => {
         );
     };
 
+    const renderSublessonContent = () => {
+        if (sublesson.type === 'practice') {
+            // Check if this is a finger spelling practice sublesson
+            if (sublesson.title.toLowerCase().includes('finger spelling')) {
+                return (
+                    <FingerSpellingSubLesson
+                        language={selectedLanguage.toLowerCase() as 'asl' | 'fsl'}
+                        onComplete={() => {
+                            // Handle completion
+                            console.log('Finger spelling sublesson completed');
+                        }}
+                    />
+                );
+            }
+            // Check if this is a numbers practice sublesson
+            else if (sublesson.content?.signs?.every(sign => !isNaN(Number(sign)))) {
+                return (
+                    <NumbersSubLesson
+                        language={selectedLanguage}
+                        onComplete={() => {
+                            // Handle completion
+                            console.log('Numbers sublesson completed');
+                        }}
+                    />
+                );
+            }
+            
+            // Default practice sublesson (alphabet)
+            return (
+                <View style={styles.content}>
+                    <View style={styles.cameraContainer}>
+                        <SignRecognitionPractice
+                            targetSign={selectedSign}
+                            onPrediction={(prediction) => {
+                                console.log('Prediction:', prediction);
+                            }}
+                        />
+                    </View>
+                    {renderSignSelection()}
+                </View>
+            );
+        }
+        
+        return (
+            <View style={styles.content}>
+                <Text>Unsupported sublesson type</Text>
+            </View>
+        );
+    };
+
     return (
         <ImageBackground 
             source={require('../../assets/icons/bgpattern.png')}
@@ -146,18 +198,7 @@ export const SubLessonScreen: React.FC = () => {
                         </Text>
                     </View>
                 </View>
-
-                <View style={styles.content}>
-                    <View style={styles.cameraContainer}>
-                        <SignRecognitionPractice
-                            targetSign={selectedSign}
-                            onPrediction={(prediction) => {
-                                console.log('Prediction:', prediction);
-                            }}
-                        />
-                    </View>
-                    {renderSignSelection()}
-                </View>
+                {renderSublessonContent()}
             </ScrollView>
         </ImageBackground>
     );

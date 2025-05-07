@@ -16,8 +16,9 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
-import { Camera as ExpoCamera, CameraType } from 'expo-camera';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Platform } from 'react-native';
+import { Camera } from 'expo-camera';
+import type { CameraCapturedPicture } from 'expo-camera';
 import * as FileSystem from 'expo-file-system';
 import { typography } from '../../constants/typography';
 
@@ -36,16 +37,23 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
     const [confidence, setConfidence] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [annotatedImage, setAnnotatedImage] = useState<string | null>(null);
-    const cameraRef = useRef<ExpoCamera>(null);
+    const cameraRef = useRef<any>(null);
 
     useEffect(() => {
-        (async () => {
-            const { status } = await ExpoCamera.requestCameraPermissionsAsync();
-            setHasPermission(status === 'granted');
-        })();
+        if (Platform.OS !== 'web') {
+            (async () => {
+                const { status } = await Camera.requestCameraPermissionsAsync();
+                setHasPermission(status === 'granted');
+            })();
+        }
     }, []);
 
     const takePicture = async () => {
+        if (Platform.OS === 'web') {
+            setError('Camera functionality is not supported in web browsers. Please use a mobile device.');
+            return;
+        }
+
         if (cameraRef.current) {
             try {
                 setIsProcessing(true);
@@ -89,6 +97,19 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
         }
     };
 
+    if (Platform.OS === 'web') {
+        return (
+            <View style={styles.container}>
+                <View style={styles.webFallback}>
+                    <Text style={styles.webFallbackText}>
+                        Camera functionality is not available in web browsers.
+                        Please use a mobile device to access this feature.
+                    </Text>
+                </View>
+            </View>
+        );
+    }
+
     if (hasPermission === null) {
         return <View style={styles.container}><Text>Requesting camera permission...</Text></View>;
     }
@@ -105,10 +126,10 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                     resizeMode="contain"
                 />
             ) : (
-                <ExpoCamera
+                <Camera
                     ref={cameraRef}
                     style={styles.camera}
-                    type={CameraType.front}
+                    type="front"
                 />
             )}
             
@@ -248,5 +269,17 @@ const styles = StyleSheet.create({
     retakeButtonText: {
         ...typography.button,
         color: '#fff',
+    },
+    webFallback: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: '#f5f5f5',
+    },
+    webFallbackText: {
+        ...typography.bodyLarge,
+        textAlign: 'center',
+        color: '#666',
     },
 }); 

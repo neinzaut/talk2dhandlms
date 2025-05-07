@@ -164,6 +164,35 @@ interface GameConfig {
     };
   }
 
+export interface NumbersSublesson extends SublessonBase {
+    type: 'numbers';
+    content: {
+        targetNumbers: string[];
+        referenceMedia: Array<{
+            number: string;
+            image: string;
+            video: string;
+            tips: {
+                ASL?: string;
+                FSL?: string;
+                commonMistakes: string[];
+            };
+        }>;
+        practiceNumbers: Array<{
+            number: string;
+            signsRequired: string[];
+            languageSpecific?: {
+                ASL?: {
+                    regionalVariation?: string;
+                };
+                FSL?: {
+                    localEquivalent?: string;
+                };
+            };
+        }>;
+    };
+}
+
 // UNION TYPE WITH DISCRIMINATORS
 export type Sublesson = 
   | AlphabetSublesson
