@@ -37,78 +37,103 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
     const [confidence, setConfidence] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [annotatedImage, setAnnotatedImage] = useState<string | null>(null);
+    const [isCameraActive, setIsCameraActive] = useState(true);
     const cameraRef = useRef<any>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        if (Platform.OS !== 'web') {
-            (async () => {
-                const { status } = await Camera.requestCameraPermissionsAsync();
-                setHasPermission(status === 'granted');
-            })();
-        }
+        let mounted = true;
+
+        const setupCamera = async () => {
+            try {
+                if (Platform.OS === 'web') {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                    }
+                    setHasPermission(true);
+                } else {
+                    const { status } = await Camera.requestCameraPermissionsAsync();
+                    if (mounted) {
+                        setHasPermission(status === 'granted');
+                    }
+                }
+            } catch (err) {
+                console.error('Error requesting camera permission:', err);
+                if (mounted) {
+                    setError('Failed to get camera permission');
+                }
+            }
+        };
+
+        setupCamera();
+
+        // Cleanup function
+        return () => {
+            mounted = false;
+            setIsCameraActive(false);
+            if (Platform.OS === 'web' && videoRef.current?.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+            }
+        };
     }, []);
 
     const takePicture = async () => {
-        if (Platform.OS === 'web') {
-            setError('Camera functionality is not supported in web browsers. Please use a mobile device.');
-            return;
-        }
-
-        if (cameraRef.current) {
-            try {
-                setIsProcessing(true);
-                setError(null);
+        try {
+            setIsProcessing(true);
+            setError(null);
+            
+            let base64Image: string;
+            
+            if (Platform.OS === 'web') {
+                if (!videoRef.current) return;
                 
+                const canvas = document.createElement('canvas');
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                
+                ctx.drawImage(videoRef.current, 0, 0);
+                base64Image = canvas.toDataURL('image/jpeg');
+            } else {
+                if (!cameraRef.current) return;
                 const photo = await cameraRef.current.takePictureAsync({
                     quality: 0.5,
                     base64: true,
                 });
-
-                // Convert the photo to base64
-                const base64Image = `data:image/jpeg;base64,${photo.base64}`;
-
-                // Send to API
-                const response = await fetch('http://localhost:5000/api/predict', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        image: base64Image,
-                    }),
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    setPrediction(data.prediction);
-                    setConfidence(data.confidence);
-                    setAnnotatedImage(data.annotated_image);
-                    onPrediction(data.prediction);
-                } else {
-                    setError(data.error || 'Failed to process image');
-                }
-            } catch (err) {
-                setError('Failed to process image');
-                console.error(err);
-            } finally {
-                setIsProcessing(false);
+                base64Image = `data:image/jpeg;base64,${photo.base64}`;
             }
+
+            // Send to API
+            const response = await fetch('http://localhost:5000/api/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: base64Image,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setPrediction(data.prediction);
+                setConfidence(data.confidence);
+                setAnnotatedImage(data.annotated_image);
+                onPrediction(data.prediction);
+            } else {
+                setError(data.error || 'Failed to process image');
+            }
+        } catch (err) {
+            setError('Failed to process image');
+            console.error(err);
+        } finally {
+            setIsProcessing(false);
         }
     };
-
-    if (Platform.OS === 'web') {
-        return (
-            <View style={styles.container}>
-                <View style={styles.webFallback}>
-                    <Text style={styles.webFallbackText}>
-                        Camera functionality is not available in web browsers.
-                        Please use a mobile device to access this feature.
-                    </Text>
-                </View>
-            </View>
-        );
-    }
 
     if (hasPermission === null) {
         return <View style={styles.container}><Text>Requesting camera permission...</Text></View>;
@@ -125,13 +150,22 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                     style={styles.camera}
                     resizeMode="contain"
                 />
-            ) : (
-                <Camera
-                    ref={cameraRef}
-                    style={styles.camera}
-                    type="front"
-                />
-            )}
+            ) : isCameraActive ? (
+                Platform.OS === 'web' ? (
+                    <video
+                        ref={videoRef}
+                        style={styles.camera}
+                        autoPlay
+                        playsInline
+                    />
+                ) : (
+                    <Camera
+                        ref={cameraRef}
+                        style={styles.camera}
+                        type="front"
+                    />
+                )
+            ) : null}
             
             <View style={styles.overlay}>
                 <View style={styles.predictionContainer}>
@@ -179,6 +213,7 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                             setAnnotatedImage(null);
                             setPrediction(null);
                             setConfidence(null);
+                            setIsCameraActive(true);
                         }}
                     >
                         <Text style={styles.retakeButtonText}>Take Another Picture</Text>
@@ -269,17 +304,5 @@ const styles = StyleSheet.create({
     retakeButtonText: {
         ...typography.button,
         color: '#fff',
-    },
-    webFallback: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#f5f5f5',
-    },
-    webFallbackText: {
-        ...typography.bodyLarge,
-        textAlign: 'center',
-        color: '#666',
     },
 }); 

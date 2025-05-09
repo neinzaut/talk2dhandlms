@@ -68,9 +68,12 @@ export const ModuleScreen: React.FC = () => {
             style={styles.container}
             resizeMode="cover"
         >
+
+            {/* MODULE OVERVIEW PAGE */}
             <ScrollView style={styles.scrollView}>
                 <View style={styles.header}>
-                    <Image source={module.image} style={styles.moduleImage} />
+                    {/* <Image source={module.image} style={styles.moduleImage} /> */}
+                    <Image source={require('../../assets/icons/module-header.png')} style={styles.moduleImage} />
                     <Text style={styles.title}>{module.title}</Text>
                     <View style={styles.progressContainer}>
                         <View style={styles.progressBarWrapper}>
@@ -80,6 +83,7 @@ export const ModuleScreen: React.FC = () => {
                     </View>
                 </View>
 
+                {/* MODULE OVERVIEW - SUBLESSONS LIST */}
                 <View style={styles.sublessonsContainer}>
                     {module.sublessons.map((sublesson) => (
                         <TouchableOpacity
@@ -158,6 +162,8 @@ const styles = StyleSheet.create({
     },
     sublessonsContainer: {
         padding: 20,
+        marginRight: '10vh',
+        marginLeft: '10vh',
     },
     sublessonCard: {
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
