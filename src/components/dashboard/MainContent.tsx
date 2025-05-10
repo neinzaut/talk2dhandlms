@@ -1,3 +1,26 @@
+/**
+ * MainContent.tsx
+ * 
+ * This component handles the main content area of the dashboard, displaying:
+ * - Current lesson progress
+ * - List of all available lessons
+ * - Progress tracking for each lesson
+ * 
+ * Key features:
+ * - Shows current lesson with progress bar
+ * - Displays all available lessons in a scrollable list
+ * - Handles navigation to lessons and sublessons
+ * - Supports both ASL and FSL content
+ * - Provides module test options for skipping content
+ * 
+ * Things you can tweak:
+ * - Lesson card design and layout
+ * - Progress bar appearance
+ * - Navigation behavior
+ * - Content organization
+ * - Module test integration
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { LessonItem } from '../lessons/LessonItem';

@@ -1,3 +1,26 @@
+/**
+ * ModuleScreen.tsx
+ * 
+ * This component displays a detailed view of a learning module, including:
+ * - Module overview with title and image
+ * - Progress tracking for the entire module
+ * - List of sublessons with their individual statuses
+ * 
+ * Key features:
+ * - Shows module progress using a progress bar
+ * - Displays sublessons with status indicators (complete, in-progress, not started)
+ * - Handles navigation to individual sublessons
+ * - Supports multiple languages through LanguageContext
+ * - Uses a background pattern for visual appeal
+ * 
+ * Things you can tweak:
+ * - Module header layout and styling
+ * - Progress bar appearance and calculation
+ * - Sublesson card design
+ * - Status icons and their colors
+ * - Background pattern and overall theme
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';

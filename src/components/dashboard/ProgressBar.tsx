@@ -1,3 +1,23 @@
+/**
+ * ProgressBar.tsx
+ * 
+ * A reusable progress bar component that displays completion percentage.
+ * Used throughout the app to show progress in lessons, modules, and achievements.
+ * 
+ * Key features:
+ * - Simple, clean design
+ * - Animated progress updates
+ * - Customizable colors and dimensions
+ * - Rounded corners for modern look
+ * 
+ * Things you can tweak:
+ * - Bar height and width
+ * - Background and progress colors
+ * - Border radius
+ * - Animation duration
+ * - Progress calculation method
+ */
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 

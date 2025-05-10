@@ -1,3 +1,27 @@
+/**
+ * Leaderboard.tsx
+ * 
+ * This component displays user achievements and rankings, including:
+ * - Daily quest progress
+ * - Daily streak tracking
+ * - Total XP earned
+ * - Global leaderboard rankings
+ * 
+ * Key features:
+ * - Responsive design (mobile/desktop layouts)
+ * - Daily streak counter with emoji
+ * - XP tracking and display
+ * - Leaderboard with rank changes
+ * - Section-based layout for different metrics
+ * 
+ * Things you can tweak:
+ * - Leaderboard layout and styling
+ * - Achievement metrics displayed
+ * - Emoji icons and visual indicators
+ * - Mobile responsiveness
+ * - Data refresh mechanism
+ */
+
 import React from 'react';
 import { View, Text, SectionList, StyleSheet, useWindowDimensions } from 'react-native';
 import { typography } from '../../constants/typography';
