@@ -2,7 +2,7 @@
  * SubLessonScreen Component
  * 
  * This component renders the main practice interface for sign language learning.
- * It displays a camera feed for sign recognition practice and a grid of selectable signs.
+ * It displays a camera feed for sign recognition practice and a grid of selectable signs taken from SignRecognitionPractice.tsx.
  * 
  * Features:
  * - Real-time sign recognition practice
@@ -105,8 +105,7 @@ export const SubLessonScreen: React.FC = () => {
     };
 
     const renderSignSelection = () => {
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        const signs = getSignImages(selectedLanguage, alphabet, 'labelled');
+        const signs = getSignImages(selectedLanguage, sublesson.content?.signs || [], 'labelled');
 
         return (
             <View style={styles.signSelectionContainer}>
@@ -255,15 +254,17 @@ const styles = StyleSheet.create({
     },
     cameraContainer: {
         width: '100%',
-        maxWidth: '640px',
-        height: '480px',
+        maxWidth: '1000px',
+        height: '45%',
         marginBottom: 20,
         borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#D9D9D9',
         overflow: 'hidden',
         alignSelf: 'center',
         backgroundColor: '#000',
         position: 'relative',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        // boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     },
     signSelectionContainer: {
         marginTop: 20,

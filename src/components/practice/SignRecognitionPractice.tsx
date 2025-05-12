@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
         flexDirection: Platform.OS === 'web' ? 'row' : 'column',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: 'white',
     },
     cameraContainer: {
         flex: Platform.OS === 'web' ? 1 : undefined,
@@ -505,7 +505,9 @@ const styles = StyleSheet.create({
     controlsContainer: {
         flex: Platform.OS === 'web' ? 1 : undefined,
         padding: 20,
-        backgroundColor: Platform.OS === 'web' ? '#f5f5f5' : 'transparent',
+        height: Platform.OS === 'web' ? '100%' : 300,
+        overflow: 'auto',
+        minHeight: Platform.OS === 'web' ? '100%' : 300,
     },
     camera: Platform.OS === 'web' 
         ? {
@@ -530,19 +532,9 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     predictionContainer: {
-        backgroundColor: Platform.OS === 'web' ? 'white' : 'rgba(0,0,0,0.7)',
-        padding: 20,
+        padding: 10,
         borderRadius: 10,
         marginBottom: 20,
-        ...(Platform.OS === 'web' ? {
-            borderWidth: 1,
-            borderColor: '#e0e0e0',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 2,
-        } : {}),
     },
     targetText: {
         ...typography.h2,
@@ -552,7 +544,7 @@ const styles = StyleSheet.create({
     },
     predictionResult: {
         alignItems: 'center',
-        marginTop: 15,
+        marginTop: 5,
     },
     predictionText: {
         ...typography.h3,
@@ -611,8 +603,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
-        backgroundColor: Platform.OS === 'web' ? '#f9f9f9' : 'rgba(0,0,0,0.3)',
+        marginBottom: 5,
+        // backgroundColor: Platform.OS === 'web' ? '#f9f9f9' : 'rgba(0,0,0,0.3)',
         padding: 10,
         borderRadius: 8,
     },
@@ -623,7 +615,7 @@ const styles = StyleSheet.create({
     },
     currentDetectionContainer: {
         backgroundColor: Platform.OS === 'web' ? '#f0f9ff' : 'rgba(0,0,0,0.5)',
-        padding: 15,
+        padding: 10,
         borderRadius: 8,
         marginVertical: 15,
         alignItems: 'center',
@@ -633,7 +625,7 @@ const styles = StyleSheet.create({
     currentDetectionTitle: {
         ...typography.bodyLarge,
         color: Platform.OS === 'web' ? '#0277bd' : '#fff',
-        marginBottom: 10,
+        marginBottom: 5,
         fontWeight: 'bold',
     },
     currentDetectionText: {
