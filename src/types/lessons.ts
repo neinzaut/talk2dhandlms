@@ -1,7 +1,7 @@
 export type Language = 'ASL' | 'FSL';
 export type SignType = 'labelled' | 'unlabelled' | 'letter' | 'number';
 export type SubLessonStatus = 'incomplete' | 'in-progress' | 'complete';
-export type SubLessonType = 'practice' | 'quiz' | 'finger-spelling';
+export type SubLessonType = 'practice' | 'quiz' | 'finger-spelling' | 'test'; // Update this every time you add a new type of sublesson
 
 export interface QuizQuestion {
     id: string;
@@ -21,6 +21,11 @@ export interface SubLesson {
         description?: string;
         signType?: SignType;
         questions?: QuizQuestion[];
+        passingScore?: number;
+        feedback?: {
+            ASL?: string[];
+            FSL?: string[];
+        };
     };
 }
 

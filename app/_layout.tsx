@@ -46,6 +46,13 @@ export default function RootLayout() {
             headerShown: true 
           })} 
         />
+        <Stack.Screen 
+          name="module/test" 
+          options={({ route }) => ({ 
+            title: 'Module Test',
+            headerShown: true 
+          })} 
+        />
       </Stack>
     </LanguageProvider>
   );

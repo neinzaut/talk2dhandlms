@@ -131,6 +131,15 @@ export const SubLessonScreen: React.FC = () => {
     };
 
     const renderSublessonContent = () => {
+        // Check if this is a module test sublesson
+        if (sublesson.type === 'test') {
+            router.push({
+                pathname: '/module/test',
+                params: { moduleId, sublessonId, title: module.title }
+            });
+            return null;
+        }
+
         if (sublesson.type === 'practice') {
             // Check if this is a finger spelling practice sublesson
             if (sublesson.title.toLowerCase().includes('finger spelling')) {
@@ -144,6 +153,7 @@ export const SubLessonScreen: React.FC = () => {
                     />
                 );
             }
+            
             // Check if this is a numbers practice sublesson
             else if (sublesson.content?.signs?.every(sign => !isNaN(Number(sign)))) {
                 return (
