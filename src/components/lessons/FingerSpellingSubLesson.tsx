@@ -1,142 +1,122 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, ScrollView, ImageBackground } from 'react-native';
-import { Camera } from 'expo-camera';
-import { useLanguage } from '../common/LanguageContext';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, ScrollView, ImageBackground, ViewStyle, TextStyle, Image, ImageStyle, TouchableOpacity } from 'react-native';
 import { SignRecognitionPractice } from '../practice/SignRecognitionPractice';
 import { typography } from '../../constants/typography';
+import { getSignImages } from '../../utils/imageUtils';
 
 interface FingerSpellingSubLessonProps {
-    language: 'asl' | 'fsl';
-    onComplete: () => void;
+    language: 'ASL' | 'FSL';
+    onComplete?: () => void;
 }
 
 export const FingerSpellingSubLesson: React.FC<FingerSpellingSubLessonProps> = ({
     language,
     onComplete
 }) => {
-    const [word, setWord] = useState('');
+    const [inputText, setInputText] = useState('');
     const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
     const [isCorrect, setIsCorrect] = useState(false);
-    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-    const cameraRef = useRef<any>(null);
 
-    React.useEffect(() => {
-        (async () => {
-            if (Platform.OS !== 'web') {
-                const { status } = await Camera.requestCameraPermissionsAsync();
-                setHasPermission(status === 'granted');
-            }
-        })();
-    }, []);
-
-    const handleWordChange = (text: string) => {
-        setWord(text.toLowerCase());
+    const handleTextChange = (text: string) => {
+        setInputText(text);
         setCurrentLetterIndex(0);
         setIsCorrect(false);
     };
 
     const handlePrediction = (prediction: string) => {
-        if (currentLetterIndex < word.length) {
-            const currentLetter = word[currentLetterIndex].toLowerCase();
+        if (currentLetterIndex < inputText.length) {
+            const currentLetter = inputText[currentLetterIndex].toLowerCase();
             const isLetterCorrect = prediction.toLowerCase() === currentLetter;
             setIsCorrect(isLetterCorrect);
 
             if (isLetterCorrect) {
                 setTimeout(() => {
-                    if (currentLetterIndex + 1 < word.length) {
+                    if (currentLetterIndex + 1 < inputText.length) {
                         setCurrentLetterIndex(prev => prev + 1);
                         setIsCorrect(false);
                     } else {
                         // Word completed
-                        onComplete();
+                        onComplete?.();
                     }
                 }, 1000);
             }
         }
     };
 
-    if (Platform.OS === 'web') {
-        return (
-            <ImageBackground 
-                source={require('../../assets/icons/bgpattern.png')}
-                style={styles.container}
-                resizeMode="cover"
-            >
-                <ScrollView style={styles.scrollView}>
-                    <View style={styles.content}>
-                        <Text style={styles.webMessage}>
-                            Camera functionality is not available on web. Please use a mobile device for finger spelling practice.
-                        </Text>
-                    </View>
-                </ScrollView>
-            </ImageBackground>
-        );
-    }
+    const renderSignPreview = () => {
+        if (!inputText) return null;
 
-    if (hasPermission === null) {
-        return (
-            <ImageBackground 
-                source={require('../../assets/icons/bgpattern.png')}
-                style={styles.container}
-                resizeMode="cover"
-            >
-                <ScrollView style={styles.scrollView}>
-                    <View style={styles.content}>
-                        <Text>Requesting camera permission...</Text>
-                    </View>
-                </ScrollView>
-            </ImageBackground>
-        );
-    }
+        const letters = inputText.split('');
+        const signs = getSignImages(language, letters, 'labelled');
 
-    if (hasPermission === false) {
         return (
-            <ImageBackground 
-                source={require('../../assets/icons/bgpattern.png')}
-                style={styles.container}
-                resizeMode="cover"
-            >
-                <ScrollView style={styles.scrollView}>
-                    <View style={styles.content}>
-                        <Text>No access to camera</Text>
-                    </View>
-                </ScrollView>
-            </ImageBackground>
+            <View style={styles.previewContainer}>
+                <Text style={styles.previewTitle}>Sign Preview</Text>
+                <View style={styles.previewGrid}>
+                    {signs.map((item, index) => (
+                        <View 
+                            key={index} 
+                            style={[
+                                styles.previewItem,
+                                index === currentLetterIndex && styles.currentPreviewItem,
+                                index < currentLetterIndex && styles.completedPreviewItem
+                            ]}
+                        >
+                            <Image source={item.path} style={styles.previewImage} />
+                            <Text style={styles.previewText}>{item.meaning}</Text>
+                        </View>
+                    ))}
+                </View>
+            </View>
         );
-    }
+    };
 
     return (
-        <ImageBackground 
-            source={require('../../assets/icons/bgpattern.png')}
-            style={styles.container}
-            resizeMode="cover"
-        >
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
-                    <View style={styles.cameraContainer}>
+                    <View style={[
+                        styles.cameraContainer,
+                        isCorrect && styles.correctSign
+                    ]}>
                         <SignRecognitionPractice
-                            targetSign={word[currentLetterIndex]}
+                            targetSign={inputText[currentLetterIndex] || ''}
                             onPrediction={handlePrediction}
                         />
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <TextInput
-                            style={styles.input}
-                            value={word}
-                            onChangeText={handleWordChange}
-                            placeholder="Type a word to practice"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                        />
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                value={inputText}
+                                onChangeText={handleTextChange}
+                                placeholder="Type a word to practice"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                            />
+                            {inputText.length > 0 && (
+                                <TouchableOpacity 
+                                    style={styles.clearButton}
+                                    onPress={() => handleTextChange('')}
+                                >
+                                    <Text style={styles.clearButtonText}>×</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
+
+                    {renderSignPreview()}
 
                     <View style={styles.progressContainer}>
                         <Text style={styles.progressText}>
-                            {currentLetterIndex < word.length ? (
-                                `Sign the letter: ${word[currentLetterIndex].toUpperCase()}`
+                            {inputText.length > 0 ? (
+                                currentLetterIndex < inputText.length ? (
+                                    `Sign the letter: ${inputText[currentLetterIndex].toUpperCase()}`
+                                ) : (
+                                    'Word completed!'
+                                )
                             ) : (
-                                'Word completed!'
+                                'Type a word to start practicing'
                             )}
                         </Text>
                         {isCorrect && (
@@ -145,17 +125,16 @@ export const FingerSpellingSubLesson: React.FC<FingerSpellingSubLessonProps> = (
                     </View>
                 </View>
             </ScrollView>
-        </ImageBackground>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
+    } as ViewStyle,
     scrollView: {
         flex: 1,
-    },
+    } as ViewStyle,
     content: {
         padding: 20,
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -170,49 +149,125 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
         alignItems: 'center',
-    },
+    } as ViewStyle,
     cameraContainer: {
-        width: '45%',
+        width: '100%',
+        maxWidth: 1000,
+        height: '45%',
         aspectRatio: 16/9,
         marginBottom: 20,
         borderRadius: 12,
         overflow: 'hidden',
         alignSelf: 'center',
-    },
+        borderWidth: 1,
+        borderColor: '#D9D9D9',
+        backgroundColor: '#000',
+    } as ViewStyle,
+    correctSign: {
+        borderColor: '#4CAF50',
+        borderWidth: 2,
+    } as ViewStyle,
     inputContainer: {
         width: '100%',
         marginBottom: 16,
-    },
+    } as ViewStyle,
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        position: 'relative',
+    } as ViewStyle,
     input: {
+        flex: 1,
         height: 48,
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 8,
         paddingHorizontal: 16,
         fontSize: 16,
-        fontWeight: 'normal',
         backgroundColor: '#fff',
-    },
+    } as TextStyle,
+    clearButton: {
+        position: 'absolute',
+        right: 12,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#e0e0e0',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: 1,
+    } as ViewStyle,
+    clearButtonText: {
+        fontSize: 20,
+        color: '#666',
+        lineHeight: 20,
+        textAlign: 'center',
+        includeFontPadding: false,
+        textAlignVertical: 'center',
+    } as TextStyle,
+    previewContainer: {
+        width: '100%',
+        marginBottom: 16,
+    } as ViewStyle,
+    previewTitle: {
+        ...typography.h3,
+        marginBottom: 12,
+        textAlign: 'center',
+        color: '#212529',
+    } as TextStyle,
+    previewGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: 12,
+        paddingHorizontal: 10,
+    } as ViewStyle,
+    previewItem: {
+        width: 60,
+        aspectRatio: 0.8,
+        alignItems: 'center',
+        padding: 8,
+        borderRadius: 8,
+        backgroundColor: '#f8f9fa',
+        borderWidth: 1,
+        borderColor: '#dee2e6',
+    } as ViewStyle,
+    currentPreviewItem: {
+        backgroundColor: '#e3f2fd',
+        borderColor: '#2196F3',
+        borderWidth: 2,
+    } as ViewStyle,
+    completedPreviewItem: {
+        backgroundColor: '#e8f5e9',
+        borderColor: '#4CAF50',
+    } as ViewStyle,
+    previewImage: {
+        width: '85%',
+        height: '70%',
+        marginBottom: 4,
+        resizeMode: 'contain',
+    } as ImageStyle,
+    previewText: {
+        ...typography.bodyMedium,
+        color: '#495057',
+        fontSize: 12,
+        textAlign: 'center',
+    } as TextStyle,
     progressContainer: {
         width: '100%',
         alignItems: 'center',
         padding: 16,
         backgroundColor: '#f8f9fa',
         borderRadius: 8,
-    },
+    } as ViewStyle,
     progressText: {
         ...typography.h3,
         marginBottom: 8,
         textAlign: 'center',
-    },
+    } as TextStyle,
     correctText: {
         ...typography.bodyLarge,
         color: '#4CAF50',
         textAlign: 'center',
-    },
-    webMessage: {
-        ...typography.bodyLarge,
-        textAlign: 'center',
-        padding: 16,
-    },
+    } as TextStyle,
 }); 

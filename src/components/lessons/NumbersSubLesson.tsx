@@ -90,12 +90,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cameraContainer: {
-        width: '45%',
+        width: '100%',
+        maxWidth: '1000px',
+        height: '45%',
         aspectRatio: 16/9,
         marginBottom: 20,
         borderRadius: 12,
         overflow: 'hidden',
         alignSelf: 'center',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#D9D9D9',
     },
     signSelectionContainer: {
         marginTop: 20,
