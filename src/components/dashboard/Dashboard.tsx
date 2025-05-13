@@ -24,6 +24,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DropdownMenu from '../common/DropdownMenu';
 import UserDropdown from '../common/UserDropdown';
 import { typography } from '../../constants/typography';
+import SideNav from '../common/SideNav';
 
 export const Dashboard: React.FC = () => {
     const { selectedLanguage, setSelectedLanguage } = useLanguage();
@@ -77,11 +78,11 @@ export const Dashboard: React.FC = () => {
     };
 
     return (
-            <ImageBackground
+        <ImageBackground
             source={require('../../assets/icons/bgpattern.png')}
             style={styles.container}
-                resizeMode="cover"
-            >
+            resizeMode="cover"
+        >
             {/* Top Navigation */}
             <View style={styles.nav}>
                 <Image source={require('../../assets/icons/logo.png')} style={styles.logo} />
@@ -133,29 +134,7 @@ export const Dashboard: React.FC = () => {
             {/* Main Content Area */}
             <View style={styles.mainContent}>
                 {/* Side Navigation */}
-                <View style={styles.navWrapper}>
-                    <View style={styles.sideNav}>
-                        <View style={styles.sideNavLinks}>
-                            {[
-                                { label: 'Learn', icon: 'book-outline' },
-                                { label: 'Practice', icon: 'school-outline' },
-                                { label: 'AI Converse', icon: 'chatbubble-ellipses-outline' },
-                            ].map((item) => (
-                                <Pressable
-                                    key={item.label}
-                                    style={({ pressed }) => [
-                                        styles.sideNavItem,
-                                        pressed && styles.navItemPressed,
-                                    ]}
-                                    android_ripple={{ color: '#e0e7ff' }}
-                                >
-                                    <Ionicons name={item.icon as any} size={22} color="#fff" style={styles.navIcon} />
-                                    <Text style={styles.navItemText}>{item.label}</Text>
-                                </Pressable>
-                            ))}
-                        </View>
-                    </View>
-                </View>
+                <SideNav />
 
                 {/* Content and Leaderboard */}
                 <View style={styles.contentArea}>
@@ -226,9 +205,9 @@ export const Dashboard: React.FC = () => {
                             </View>
                         </View>
                     </View>
-                    </View>
                 </View>
-            </ImageBackground>
+            </View>
+        </ImageBackground>
     );
 };
 
@@ -313,43 +292,6 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         backgroundColor: 'transparent',
-    },
-    navWrapper: {
-        backgroundColor: '#0073FF',
-        shadowOpacity: 0.18,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    sideNav: {
-        width: 250,
-        alignItems: 'center',
-        paddingTop: 32,
-        backgroundColor: 'transparent',
-    },
-    sideNavLinks: {
-        width: '100%',
-        paddingHorizontal: 16,
-    },
-    sideNavItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        marginBottom: 8,
-        width: '100%',
-    },
-    navItemPressed: {
-        backgroundColor: 'rgba(255,255,255,0.18)',
-    },
-    navIcon: {
-        marginRight: 12,
-    },
-    navItemText: {
-        color: '#fff',
-        fontSize: 17,
-        fontWeight: '500',
-        letterSpacing: 0.2,
     },
     contentArea: {
         flex: 1,

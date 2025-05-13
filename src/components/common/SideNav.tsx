@@ -2,16 +2,21 @@ import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, Image, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { typography } from '../../constants/typography';
+import { useRouter } from 'expo-router';
+
+type Route = '/' | '/practice' | '/module' | '/sublesson' | '/module/test' | '/ai-converse';
 
 const menuItems = [
-  { label: 'Learn', icon: 'book-outline' },
-  { label: 'Practice', icon: 'school-outline' },
-  { label: 'AI Converse', icon: 'chatbubble-ellipses-outline' },
-];
+  { label: 'Learn', icon: 'book-outline', route: '/' as Route },
+  { label: 'Practice', icon: 'school-outline', route: '/practice' as Route },
+  { label: 'AI Converse', icon: 'chatbubble-ellipses-outline', route: '/ai-converse' as Route },
+] as const;
 
 const SideNav: React.FC = () => {
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
+    const router = useRouter();
+
     if (isMobile) return null;
 
     return (
@@ -19,7 +24,7 @@ const SideNav: React.FC = () => {
           <View style={styles.nav}>
             {/* <Image source={require('../../assets/icons/logo.png')} style={styles.logoImg} /> */}
             <View style={styles.navLinks}>
-              {menuItems.map((item, idx) => (
+              {menuItems.map((item) => (
                 <Pressable
                   key={item.label}
                   style={({ pressed }) => [
@@ -27,6 +32,7 @@ const SideNav: React.FC = () => {
                     pressed && styles.navItemPressed,
                   ]}
                   android_ripple={{ color: '#e0e7ff' }}
+                  onPress={() => router.push(item.route)}
                 >
                   <Ionicons name={item.icon as any} size={22} color="#fff" style={styles.navIcon} />
                   <Text style={styles.navItemText}>{item.label}</Text>

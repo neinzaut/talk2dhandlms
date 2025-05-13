@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { SignRecognitionPractice } from '../practice/SignRecognitionPractice';
+import { SignRecognitionPractice } from '../(practice)/SignRecognitionPractice';
 import { typography } from '../../constants/typography';
 
 interface SignRecognitionLessonProps {

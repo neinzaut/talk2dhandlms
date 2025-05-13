@@ -23,7 +23,7 @@ import { useLanguage } from '../common/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import { SubLessonStatus, SubLesson } from '../../types/lessons';
 import { typography } from '../../constants/typography';
-import { SignRecognitionPractice } from '../practice/SignRecognitionPractice';
+import { SignRecognitionPractice } from '../(practice)/SignRecognitionPractice';
 import { getSignImages } from '../../utils/imageUtils';
 import { NumbersSubLesson } from './NumbersSubLesson';
 import { FingerSpellingSubLesson } from './FingerSpellingSubLesson';

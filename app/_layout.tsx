@@ -35,14 +35,14 @@ export default function RootLayout() {
         <Stack.Screen 
           name="module" 
           options={({ route }) => ({ 
-            title: route.params?.title,
+            title: route.params?.title as string,
             headerShown: true 
           })} 
         />
         <Stack.Screen 
           name="sublesson" 
           options={({ route }) => ({ 
-            title: route.params?.title,
+            title: route.params?.title as string,
             headerShown: true 
           })} 
         />
@@ -52,6 +52,20 @@ export default function RootLayout() {
             title: 'Module Test',
             headerShown: true 
           })} 
+        />
+        <Stack.Screen 
+          name="practice" 
+          options={{ 
+            title: 'Practice',
+            headerShown: false, // removes expo-router header
+          }} 
+        />
+        <Stack.Screen 
+          name="ai-converse" 
+          options={{ 
+            title: 'Practice',
+            headerShown: false, // removes expo-router header
+          }} 
         />
       </Stack>
     </LanguageProvider>

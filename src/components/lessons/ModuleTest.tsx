@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ViewStyle, TextStyle, ImageStyle, ImageBackground } from 'react-native';
-import { SignRecognitionPractice } from '../practice/SignRecognitionPractice';
+import { SignRecognitionPractice } from '../(practice)/SignRecognitionPractice';
 import { getSignImage } from '../../utils/imageUtils';
 import { typography } from '../../constants/typography';
 import { useLanguage } from '../common/LanguageContext';
