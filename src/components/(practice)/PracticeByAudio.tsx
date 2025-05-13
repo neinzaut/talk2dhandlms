@@ -17,7 +17,8 @@ interface Level {
     letters: string[];
 }
 
-const LEVELS: Level[] = [
+// Language-specific level definitions
+const ASL_LEVELS: Level[] = [
     {
         id: 1,
         name: 'Level 1',
@@ -48,11 +49,56 @@ const LEVELS: Level[] = [
         description: 'Master Letters (U-Z)',
         letters: ['U', 'V', 'W', 'X', 'Y', 'Z'],
     },
+    {
+        id: 6,
+        name: 'Level 6',
+        description: 'Numbers (0-9)',
+        letters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+    },
+];
+
+const FSL_LEVELS: Level[] = [
+    {
+        id: 1,
+        name: 'Level 1',
+        description: 'Basic Letters (A-E)',
+        letters: ['A', 'B', 'C', 'D', 'E'],
+    },
+    {
+        id: 2,
+        name: 'Level 2',
+        description: 'Intermediate Letters (F-J)',
+        letters: ['F', 'G', 'H', 'I', 'J'],
+    },
+    {
+        id: 3,
+        name: 'Level 3',
+        description: 'Advanced Letters (K-O)',
+        letters: ['K', 'L', 'M', 'N', 'O'],
+    },
+    {
+        id: 4,
+        name: 'Level 4',
+        description: 'Expert Letters (P-T)',
+        letters: ['P', 'Q', 'R', 'S', 'T'],
+    },
+    {
+        id: 5,
+        name: 'Level 5',
+        description: 'Master Letters (U-Z)',
+        letters: ['U', 'V', 'W', 'X', 'Y', 'Z'],
+    },
+    {
+        id: 6,
+        name: 'Level 6',
+        description: 'Special Characters',
+        letters: ['ñ', 'ng', 'ch'],
+    },
 ];
 
 const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
     const { selectedLanguage } = useLanguage();
-    const [currentLevel, setCurrentLevel] = useState<Level>(LEVELS[0]);
+    const [currentLevel, setCurrentLevel] = useState<Level>(selectedLanguage === 'ASL' ? ASL_LEVELS[0] : FSL_LEVELS[0]);
     const [currentLetter, setCurrentLetter] = useState<string>('');
     const [score, setScore] = useState(0);
     const [attempts, setAttempts] = useState(0);
@@ -61,6 +107,11 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
     const [recording, setRecording] = useState<Audio.Recording | null>(null);
     const [answerStatus, setAnswerStatus] = useState<'correct' | 'incorrect' | null>(null);
     const [showLevels, setShowLevels] = useState(true);
+
+    // Get available levels based on selected language
+    const getAvailableLevels = () => {
+        return selectedLanguage === 'ASL' ? ASL_LEVELS : FSL_LEVELS;
+    };
 
     // Generate a random letter from current level
     const generateLetter = () => {
@@ -171,7 +222,7 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
                 </View>
 
                 <ScrollView style={styles.levelsContainer}>
-                    {LEVELS.map((level) => (
+                    {getAvailableLevels().map((level) => (
                         <TouchableOpacity
                             key={level.id}
                             style={styles.levelCard}
