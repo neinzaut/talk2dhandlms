@@ -49,13 +49,16 @@ export const LessonItem: React.FC<LessonItemProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: '#fff',
-        borderRadius: 10,
         marginBottom: 15,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#EAEAEA',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 3,
+        overflow: 'hidden',
     },
     image: {
         width: '100%',

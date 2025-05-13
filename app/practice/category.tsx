@@ -10,12 +10,12 @@ const PracticeCategory = () => {
 
   const getCategoryTitle = () => {
     switch (categoryId) {
-      case 'alphabet':
-        return 'Alphabet Practice';
-      case 'numbers':
-        return 'Numbers Practice';
-      case 'common-phrases':
-        return 'Common Phrases';
+      case 'daily-challenge':
+        return 'Daily Challenge';
+      case 'matching-game':
+        return 'Matching Game';
+      case 'practice-audio':
+        return 'Practice by Audio';
       default:
         return 'Practice';
     }

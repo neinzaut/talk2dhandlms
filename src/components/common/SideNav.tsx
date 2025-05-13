@@ -9,7 +9,9 @@ type Route = '/' | '/practice' | '/module' | '/sublesson' | '/module/test' | '/a
 const menuItems = [
   { label: 'Learn', icon: 'book-outline', route: '/' as Route },
   { label: 'Practice', icon: 'school-outline', route: '/practice' as Route },
-  { label: 'AI Converse', icon: 'chatbubble-ellipses-outline', route: '/ai-converse' as Route },
+  // { label: 'AI Converse', icon: 'chatbubble-ellipses-outline', route: '/ai-converse' as Route },
+  { label: 'Translate', icon: 'chatbubble-ellipses-outline', route: '/ai-converse' as Route },
+
 ] as const;
 
 const SideNav: React.FC = () => {

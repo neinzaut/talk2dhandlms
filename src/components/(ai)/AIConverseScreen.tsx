@@ -54,8 +54,14 @@ export default function AIConverseScreen() {
               message.isUser ? styles.userMessage : styles.aiMessage,
             ]}
           >
-            <Text style={styles.messageText}>{message.text}</Text>
-            <Text style={styles.timestamp}>
+            <Text style={[
+              styles.messageText,
+              message.isUser ? styles.userMessageText : styles.aiMessageText
+            ]}>{message.text}</Text>
+            <Text style={[
+              styles.timestamp,
+              message.isUser ? styles.userTimestamp : styles.aiTimestamp
+            ]}>
               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
           </View>
@@ -116,14 +122,35 @@ const styles = StyleSheet.create({
   aiMessage: {
     alignSelf: 'flex-start',
     backgroundColor: '#F3F4F6',
+    textDecorationColor: '#545454',
   },
   messageText: {
     ...typography.bodyMedium,
+    color: '#1F2937',
+  },
+  userMessageText: {
+    ...typography.bodyMedium,
     color: '#FFFFFF',
+  },
+  aiMessageText: {
+    ...typography.bodyMedium,
+    color: '#1F2937',
   },
   timestamp: {
     ...typography.caption,
     color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 4,
+    fontSize: 10,
+  },
+  userTimestamp: {
+    ...typography.caption,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 4,
+    fontSize: 10,
+  },
+  aiTimestamp: {
+    ...typography.caption,
+    color: 'rgba(31, 41, 55, 0.7)',
     marginTop: 4,
     fontSize: 10,
   },

@@ -65,7 +65,7 @@ export default function RootLayout() {
         <Stack.Screen 
           name="ai-converse" 
           options={{ 
-            title: 'AI Converse',
+            title: 'Translate',
             headerShown: false,
           }} 
         />
