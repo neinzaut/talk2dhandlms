@@ -279,7 +279,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
 
     return (
         <ImageBackground 
-            source={require('../../assets/images/bgpattern.png')}
+            source={require('../../assets/icons/bgpattern.png')}
             style={styles.background}
             resizeMode="cover"
         >
