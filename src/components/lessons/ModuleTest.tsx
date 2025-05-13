@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ViewStyle, TextStyle, ImageStyle, ImageBackground } from 'react-native';
 import { SignRecognitionPractice } from '../practice/SignRecognitionPractice';
-import { getSignImages } from '../../utils/imageUtils';
+import { getSignImage } from '../../utils/imageUtils';
 import { typography } from '../../constants/typography';
+import { useLanguage } from '../common/LanguageContext';
 
 interface ModuleTestProps {
     moduleId: number;
@@ -20,36 +21,78 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
     moduleId,
     onComplete
 }) => {
+    const { selectedLanguage } = useLanguage();
     const [isStarted, setIsStarted] = useState(false);
     const [currentItemIndex, setCurrentItemIndex] = useState(0);
     const [hearts, setHearts] = useState(3);
     const [testItems, setTestItems] = useState<TestItem[]>([]);
     const [isCorrect, setIsCorrect] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [timer, setTimer] = useState(5);
+    const [showPreview, setShowPreview] = useState(true);
 
     // Generate random test items based on module content
     useEffect(() => {
-        if (moduleId === 1) {
-            // Module 1: Alphabets and Numbers
-            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-            const numbers = Array.from({ length: 11 }, (_, i) => i.toString());
-            
-            const items: TestItem[] = [];
-            // Add 3 random letters
-            for (let i = 0; i < 3; i++) {
-                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-                items.push({ sign: randomLetter, type: 'letter' });
+        console.log('Effect triggered - isStarted:', isStarted, 'moduleId:', moduleId);
+        if (isStarted && !isNaN(moduleId)) {
+            console.log('Generating test items...');
+            if (moduleId === 1) {
+                // Module 1: Alphabets and Numbers
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                const numbers = Array.from({ length: 11 }, (_, i) => i.toString());
+                
+                const items: TestItem[] = [];
+                // Add 3 random letters
+                for (let i = 0; i < 3; i++) {
+                    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                    items.push({ sign: randomLetter, type: 'letter' });
+                }
+                // Add 2 random numbers
+                for (let i = 0; i < 2; i++) {
+                    const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
+                    items.push({ sign: randomNumber, type: 'number' });
+                }
+                // Shuffle the items
+                const shuffledItems = items.sort(() => Math.random() - 0.5);
+                console.log('Generated test items:', shuffledItems);
+                setTestItems(shuffledItems);
+            } else {
+                console.log('Unsupported module ID:', moduleId);
+                setTestItems([]);
             }
-            // Add 2 random numbers
-            for (let i = 0; i < 2; i++) {
-                const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-                items.push({ sign: randomNumber, type: 'number' });
-            }
-            // Shuffle the items
-            setTestItems(items.sort(() => Math.random() - 0.5));
         }
-        // Add more module conditions here
-    }, [moduleId]);
+    }, [isStarted, moduleId]);
+
+    // Log state changes
+    useEffect(() => {
+        console.log('State updated - testItems:', testItems.length, 'currentItemIndex:', currentItemIndex);
+    }, [testItems, currentItemIndex]);
+
+    // Timer effect
+    useEffect(() => {
+        if (isStarted && !showResults && !showPreview) {
+            const interval = setInterval(() => {
+                setTimer((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        // Move to next item or show results
+                        if (currentItemIndex + 1 < testItems.length) {
+                            setCurrentItemIndex(prev => prev + 1);
+                            setTimer(5);
+                            setShowPreview(true);
+                        } else {
+                            setShowResults(true);
+                            const score = Math.round((testItems.filter(item => item.isCorrect).length / testItems.length) * 100);
+                            onComplete?.(score);
+                        }
+                        return 5;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [isStarted, showResults, showPreview, currentItemIndex, testItems.length]);
 
     const handlePrediction = (prediction: string) => {
         const currentItem = testItems[currentItemIndex];
@@ -64,18 +107,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
                 isCorrect: true
             };
             setTestItems(updatedItems);
-
-            // Move to next item or show results
-            setTimeout(() => {
-                if (currentItemIndex + 1 < testItems.length) {
-                    setCurrentItemIndex(prev => prev + 1);
-                    setIsCorrect(false);
-                } else {
-                    setShowResults(true);
-                    const score = Math.round((testItems.filter(item => item.isCorrect).length / testItems.length) * 100);
-                    onComplete?.(score);
-                }
-            }, 1000);
+            setShowPreview(false);
         } else {
             // Deduct a heart
             setHearts(prev => {
@@ -87,6 +119,11 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
                 return newHearts;
             });
         }
+    };
+
+    const handleStartTest = () => {
+        console.log('Starting test...');
+        setIsStarted(true);
     };
 
     const renderHearts = () => {
@@ -138,56 +175,125 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
         );
     };
 
-    if (!isStarted) {
+    const renderPreview = () => {
+        const currentItem = testItems[currentItemIndex];
+        console.log('Rendering preview - currentItem:', currentItem);
+        if (!currentItem) return null;
+
+        const signImage = getSignImage(selectedLanguage, currentItem.sign, currentItem.type);
+
         return (
-            <View style={styles.container}>
-                <Text style={styles.title}>Module Test</Text>
-                <Text style={styles.description}>
-                    Test your knowledge of the signs you've learned!
+            <View style={styles.previewContainer}>
+                <Text style={styles.previewTitle}>
+                    Sign this {currentItem.type}:
                 </Text>
+                {signImage.path ? (
+                    <Image 
+                        source={signImage.path}
+                        style={styles.previewImage}
+                        resizeMode="contain"
+                    />
+                ) : (
+                    <Text style={styles.previewText}>{currentItem.sign}</Text>
+                )}
                 <TouchableOpacity 
-                    style={styles.startButton}
-                    onPress={() => setIsStarted(true)}
+                    style={styles.startSigningButton}
+                    onPress={() => setShowPreview(false)}
                 >
-                    <Text style={styles.startButtonText}>Start Test</Text>
+                    <Text style={styles.startSigningButtonText}>Start Signing</Text>
                 </TouchableOpacity>
             </View>
         );
-    }
+    };
 
-    if (showResults) {
-        return renderResults();
-    }
+    const renderContent = () => {
+        if (!isStarted) {
+            return (
+                <View style={styles.container}>
+                    <Text style={styles.title}>Module Test</Text>
+                    <Text style={styles.description}>
+                        Test your knowledge of the signs you've learned!
+                    </Text>
+                    <TouchableOpacity 
+                        style={styles.startButton}
+                        onPress={handleStartTest}
+                    >
+                        <Text style={styles.startButtonText}>Start Test</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+
+        if (showResults) {
+            return renderResults();
+        }
+
+        const currentItem = testItems[currentItemIndex];
+        if (!currentItem) {
+            return (
+                <View style={styles.container}>
+                    <Text style={styles.title}>Loading test items...</Text>
+                    <Text style={styles.description}>
+                        Please wait while we prepare your test...
+                    </Text>
+                </View>
+            );
+        }
+
+        return (
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.content}>
+                    {renderHearts()}
+                    
+                    {showPreview ? (
+                        renderPreview()
+                    ) : (
+                        <>
+                            <View style={[
+                                styles.cameraContainer,
+                                isCorrect && styles.correctSign
+                            ]}>
+                                <SignRecognitionPractice
+                                    targetSign={currentItem.sign}
+                                    onPrediction={handlePrediction}
+                                />
+                            </View>
+                            <View style={styles.timerContainer}>
+                                <Text style={styles.timerText}>{timer}s</Text>
+                            </View>
+                        </>
+                    )}
+
+                    <View style={styles.progressContainer}>
+                        <Text style={styles.progressText}>
+                            {currentItem.type === 'letter' ? 'Letter' : 'Number'}: {currentItem.sign}
+                        </Text>
+                        <Text style={styles.progressCount}>
+                            {currentItemIndex + 1} of {testItems.length}
+                        </Text>
+                    </View>
+                </View>
+            </ScrollView>
+        );
+    };
 
     return (
-        <ScrollView style={styles.scrollView}>
-            <View style={styles.content}>
-                {renderHearts()}
-                
-                <View style={[
-                    styles.cameraContainer,
-                    isCorrect && styles.correctSign
-                ]}>
-                    <SignRecognitionPractice
-                        targetSign={testItems[currentItemIndex]?.sign || ''}
-                        onPrediction={handlePrediction}
-                    />
-                </View>
-
-                <View style={styles.progressContainer}>
-                    <Text style={styles.progressText}>
-                        Sign {testItems[currentItemIndex]?.type === 'letter' ? 'the letter' : 'the number'}: {testItems[currentItemIndex]?.sign}
-                    </Text>
-                    <Text style={styles.progressCount}>
-                        {currentItemIndex + 1} of {testItems.length}
-                    </Text>
-                </View>
-            </View>
-        </ScrollView>
+        <ImageBackground 
+            source={require('../../assets/images/bgpattern.png')}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            {renderContent()}
+        </ImageBackground>
     );
 };
 
 const styles = StyleSheet.create({
+    background: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    } as ViewStyle,
     container: {
         flex: 1,
         padding: 20,
@@ -270,6 +376,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         alignItems: 'center',
+        visibility: 'auto',
     } as ViewStyle,
     resultsTitle: {
         ...typography.h1,
@@ -306,5 +413,50 @@ const styles = StyleSheet.create({
     mistakeText: {
         ...typography.bodyMedium,
         color: '#dc3545',
+    } as TextStyle,
+    previewContainer: {
+        width: '100%',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        marginBottom: 20,
+    } as ViewStyle,
+    previewTitle: {
+        ...typography.h2,
+        marginBottom: 16,
+        textAlign: 'center',
+    } as TextStyle,
+    previewImage: {
+        width: 200,
+        height: 200,
+        marginBottom: 20,
+    } as ImageStyle,
+    startSigningButton: {
+        backgroundColor: '#2196F3',
+        paddingHorizontal: 32,
+        paddingVertical: 16,
+        borderRadius: 8,
+    } as ViewStyle,
+    startSigningButtonText: {
+        ...typography.button,
+        color: '#fff',
+    } as TextStyle,
+    timerContainer: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: 8,
+        borderRadius: 20,
+    } as ViewStyle,
+    timerText: {
+        ...typography.h3,
+        color: '#fff',
+    } as TextStyle,
+    previewText: {
+        ...typography.h1,
+        fontSize: 72,
+        marginBottom: 20,
     } as TextStyle,
 });
