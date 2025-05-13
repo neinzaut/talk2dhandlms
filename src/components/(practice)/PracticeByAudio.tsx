@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ProgressBarAndroid } from 'react-native';
 import { useLanguage } from '../common/LanguageContext';
 import { typography } from '../../constants/typography';
 import { Audio } from 'expo-av';
@@ -192,9 +192,18 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
                 <Text style={styles.title}>Practice by Audio</Text>
                 <Text style={styles.subtitle}>Say the letter shown in the sign!</Text>
                 <View style={styles.progressContainer}>
-                    <Text style={styles.progressText}>
-                        Progress: {score}/5
-                    </Text>
+                    <View style={styles.progressBarContainer}>
+                        <ProgressBarAndroid 
+                            progress={score / 5} 
+                            styleAttr="Horizontal"
+                            indeterminate={false}
+                            color="#2196F3"
+                            style={styles.progressBar}
+                        />
+                        <Text style={styles.progressText}>
+                            {score}/5
+                        </Text>
+                    </View>
                     <Text style={styles.attemptsText}>
                         Attempts: {attempts}
                     </Text>
@@ -289,21 +298,32 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     progressContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         backgroundColor: '#f8f9fa',
         padding: 12,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#dee2e6',
     },
+    progressBarContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    progressBar: {
+        flex: 1,
+        height: 8,
+        marginRight: 8,
+    },
     progressText: {
         ...typography.bodyLarge,
         color: '#495057',
+        minWidth: 40,
+        textAlign: 'right',
     },
     attemptsText: {
         ...typography.bodyLarge,
         color: '#495057',
+        textAlign: 'right',
     },
     practiceContainer: {
         flex: 1,

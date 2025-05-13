@@ -46,9 +46,19 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) => {
                 <Text style={styles.title}>Daily Challenge</Text>
                 <Text style={styles.subtitle}>Complete 5 signs to finish today's challenge!</Text>
                 <View style={styles.progressContainer}>
-                    <Text style={styles.progressText}>
-                        Progress: {challengesCompleted}/5
-                    </Text>
+                    <View style={styles.progressBarContainer}>
+                        <View style={styles.progressBarBackground}>
+                            <View 
+                                style={[
+                                    styles.progressBarFill,
+                                    { width: `${(challengesCompleted / 5) * 100}%` }
+                                ]} 
+                            />
+                        </View>
+                        <Text style={styles.progressText}>
+                            {challengesCompleted}/5
+                        </Text>
+                    </View>
                     <Text style={styles.scoreText}>
                         Score: {score}
                     </Text>
@@ -108,21 +118,40 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     progressContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         backgroundColor: '#f8f9fa',
         padding: 12,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#dee2e6',
     },
+    progressBarContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    progressBarBackground: {
+        flex: 1,
+        height: 8,
+        backgroundColor: '#e9ecef',
+        borderRadius: 4,
+        marginRight: 8,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: '#2196F3',
+        borderRadius: 4,
+    },
     progressText: {
         ...typography.bodyLarge,
         color: '#495057',
+        minWidth: 40,
+        textAlign: 'right',
     },
     scoreText: {
         ...typography.bodyLarge,
         color: '#495057',
+        textAlign: 'right',
     },
     challengeContainer: {
         flex: 1,
