@@ -216,6 +216,7 @@ export const SubLessonScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
     },
     scrollView: {
         flex: 1,
@@ -249,16 +250,16 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        // backgroundColor: 'rgba(255, 255, 255, 0.9)', // body container in sublesson
         margin: 20,
         borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        // shadowColor: '#000',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 2,
+        // },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 4,
         elevation: 3,
         alignItems: 'center',
     },

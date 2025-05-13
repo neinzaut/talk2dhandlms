@@ -50,48 +50,6 @@ export const LessonItem: React.FC<LessonItemProps> = ({
         </View>
       </View>
 
-      {/* SUBLESSONS CONTAINER - will revisit later ; tanggal muna kc scroll issues */}
-{/* 
-      <View style={styles.sublessonsContainer}>
-        {sublessons.map((sublesson, index) => (
-          <TouchableOpacity 
-            key={`sublesson-${index}`} 
-            style={styles.sublessonItem}
-            activeOpacity={0.7}
-            onPress={() => {}}
-            onStartShouldSetResponder={() => true}
-          >
-            <View style={styles.sublessonLeft}>
-              <View style={[
-                styles.sublessonIcon,
-                sublesson.progress === 100 && styles.completedIcon,
-                sublesson.progress > 0 && styles.inProgressIcon
-              ]}>
-                {sublesson.progress === 100 ? (
-                  <Text style={styles.checkmark}>✓</Text>
-                ) : (
-                  <Text style={styles.sublessonNumber}>{index + 1}</Text>
-                )}
-              </View>
-              <Text 
-                style={styles.sublessonTitle}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {sublesson.title}
-              </Text>
-            </View>
-            <View style={styles.sublessonProgress}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${sublesson.progress}%` }]} />
-              </View>
-              <Text style={styles.sublessonProgressText}>
-                {sublesson.progress}%
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View> */}
     </TouchableOpacity>
   );
 };
