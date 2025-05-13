@@ -15,57 +15,19 @@
  * - Accessed after language selection
  */
 
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Pressable, ImageBackground } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ImageBackground } from 'react-native';
 import { useLanguage } from '../common/LanguageContext';
 import { useLessons } from '../../hooks/useLessons';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import DropdownMenu from '../common/DropdownMenu';
-import UserDropdown from '../common/UserDropdown';
 import { typography } from '../../constants/typography';
 import SideNav from '../common/SideNav';
+import TopNav from '../common/TopNav';
 
 export const Dashboard: React.FC = () => {
-    const { selectedLanguage, setSelectedLanguage } = useLanguage();
+    const { selectedLanguage } = useLanguage();
     const { lessons } = useLessons(selectedLanguage);
     const router = useRouter();
-    const [dropdownVisible, setDropdownVisible] = useState(false);
-    const dropdownRef = useRef<View>(null);
-
-    const languageData = {
-        ASL: {
-            icon: require('../../assets/icons/icon-asl.png'),
-            label: 'American Sign Language',
-        },
-        FSL: {
-            icon: require('../../assets/icons/icon-fsl.png'),
-            label: 'Filipino Sign Language',
-        },
-    };
-
-    const dropdownItems = [
-        {
-            icon: languageData.ASL.icon,
-            label: languageData.ASL.label,
-            onPress: () => setSelectedLanguage('ASL'),
-        },
-        {
-            icon: languageData.FSL.icon,
-            label: languageData.FSL.label,
-            onPress: () => setSelectedLanguage('FSL'),
-        },
-    ];
-
-    const handleOutsidePress = () => {
-        setDropdownVisible(false);
-    };
-
-    const user = {
-        name: 'Francesca Tuazon',
-        email: 'tfa2079@dlsud.ph',
-        avatar: require('../../assets/icons/icon-user.png'),
-    };
 
     const handleModulePress = (moduleId: string, title: string) => {
         router.push({
@@ -84,52 +46,7 @@ export const Dashboard: React.FC = () => {
             resizeMode="cover"
         >
             {/* Top Navigation */}
-            <View style={styles.nav}>
-                <Image source={require('../../assets/icons/logo.png')} style={styles.logo} />
-                <View style={styles.navLinks}>
-                    <TouchableOpacity style={styles.navItem}>
-                        <Text style={styles.navLink}>Streak</Text>
-                    </TouchableOpacity>
-
-                    <View ref={dropdownRef} style={styles.languageSelector}>
-                        <TouchableOpacity
-                            style={styles.selectedLanguage}
-                            onPress={() => setDropdownVisible(!dropdownVisible)}
-                            activeOpacity={0.8}
-                        >
-                            <Image
-                                source={languageData[selectedLanguage].icon}
-                                style={styles.selectedLanguageIcon}
-                            />
-                            <Text style={styles.selectedLanguageText} numberOfLines={1}>
-                                {languageData[selectedLanguage].label}
-                            </Text>
-                            <Image
-                                source={require('../../assets/icons/icon-dropdown.png')}
-                                style={[
-                                    styles.chevronIcon,
-                                    dropdownVisible && { transform: [{ rotate: '180deg' }] }
-                                ]}
-                            />
-                        </TouchableOpacity>
-                        
-                        <DropdownMenu 
-                            items={dropdownItems}
-                            isVisible={dropdownVisible}
-                            onClose={() => setDropdownVisible(false)}
-                        />
-                    </View>
-
-                    <UserDropdown user={user} />
-                </View>
-
-                {dropdownVisible && (
-                    <Pressable 
-                        style={styles.overlay} 
-                        onPress={handleOutsidePress}
-                    />
-                )}
-            </View>
+            <TopNav />
 
             {/* Main Content Area */}
             <View style={styles.mainContent}>
@@ -200,7 +117,7 @@ export const Dashboard: React.FC = () => {
                                 <View style={styles.leaderboardItem}>
                                     <Text style={styles.rank}>3</Text>
                                     <Text style={styles.username}>User3</Text>
-                                    <Text style={styles.score}>1,850 XP</Text>
+                                    <Text style={styles.score}>1,950 XP</Text>
                                 </View>
                             </View>
                         </View>
@@ -216,78 +133,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
-    nav: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        height: 60,
-        backgroundColor: '#FFFFFF',
-        width: '100%',
-        borderBottomWidth: 1,
-        borderBottomColor: '#D9D9D9',
-        position: 'relative',
-        zIndex: 10,
-    },
-    overlay: {
-        position: 'absolute',
-        top: 60,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'transparent',
-        zIndex: 5,
-    },
-    logo: {
-        width: 120,
-        height: 40,
-        resizeMode: 'contain',
-    },
-    navLinks: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    navItem: {
-        marginLeft: 20,
-    },
-    navLink: {
-        color: '#545454',
-        fontSize: 16,
-    },
-    languageSelector: {
-        position: 'relative',
-        marginLeft: 20,
-        zIndex: 100,
-    },
-    selectedLanguage: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 6,
-        minWidth: 180,
-        maxWidth: 200,
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: '#EAEAEA',
-    },
-    selectedLanguageIcon: {
-        width: 24,
-        height: 24,
-        marginRight: 8,
-    },
-    selectedLanguageText: {
-        color: '#1f2937',
-        fontSize: 14,
-        fontWeight: '500',
-        marginRight: 8,
-        flexShrink: 1,
-    },
-    chevronIcon: {
-        width: 14,
-        height: 14,
-        marginLeft: 'auto',
-    },
     mainContent: {
         flex: 1,
         flexDirection: 'row',
@@ -296,175 +141,150 @@ const styles = StyleSheet.create({
     contentArea: {
         flex: 1,
         flexDirection: 'row',
-        padding: 16,
-        backgroundColor: 'transparent',
-        paddingLeft: '4vh',
-        paddingRight: '4vh',
-
-    },
-    contentTitle: {
-        ...typography.h1,
-        color: '#212529',
-        marginBottom: 16,
+        padding: 20,
     },
     lessonsContainer: {
-        flex: 2,
-        backgroundColor: 'transparent',
+        flex: 1,
+        marginRight: 20,
+    },
+    contentTitle: {
+        ...typography.h2,
+        color: '#212529',
+        marginBottom: 20,
     },
     moduleCard: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        marginBottom: 16,
+        backgroundColor: '#FFFFFF',
         borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#EAEAEA',
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.05,
-        // shadowRadius: 4,
-        // elevation: 3,
+        padding: 16,
+        marginBottom: 16,
     },
     moduleContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
     },
     moduleIcon: {
-        width: 60,
-        height: 60,
+        width: 48,
+        height: 48,
         marginRight: 16,
-        resizeMode: 'contain',
-        backgroundColor: '#f8f9fa',
-        padding: 8,
     },
     moduleInfo: {
         flex: 1,
-        marginRight: 16,
     },
     moduleNumber: {
-        ...typography.bodyMedium,
+        ...typography.bodySmall,
         color: '#6c757d',
         marginBottom: 4,
     },
     moduleTitle: {
-        ...typography.h4,
+        ...typography.h3,
         color: '#212529',
     },
     progressContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        marginLeft: 16,
     },
     progressBarWrapper: {
-        width: 120,
-        height: 8,
-        backgroundColor: '#e0e0e0',
-        borderRadius: 4,
+        width: 100,
+        height: 4,
+        backgroundColor: '#e9ecef',
+        borderRadius: 2,
+        marginRight: 8,
         overflow: 'hidden',
     },
     progressBar: {
         height: '100%',
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#2196F3',
+        borderRadius: 2,
     },
     progressText: {
-        ...typography.label,
+        ...typography.bodySmall,
         color: '#6c757d',
+        minWidth: 40,
     },
     rightPanel: {
-        width: 250,
-        gap: 16,
-        backgroundColor: 'transparent',
-        marginLeft: '4vh',
+        width: 300,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 20,
     },
     experienceArea: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#EAEAEA',
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.05,
-        // shadowRadius: 4,
-        elevation: 3,
+        marginBottom: 24,
     },
     experienceTitle: {
-        ...typography.h2,
+        ...typography.h3,
         color: '#212529',
         marginBottom: 16,
     },
     experienceContent: {
-        gap: 12,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        padding: 16,
     },
     levelInfo: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        marginBottom: 8,
     },
     levelText: {
-        ...typography.h3,
-        color: '#0073FF',
+        ...typography.bodyLarge,
+        color: '#212529',
+        fontWeight: '600',
     },
     xpText: {
         ...typography.bodyLarge,
         color: '#6c757d',
     },
     progressBarContainer: {
-        height: 8,
+        height: 4,
         backgroundColor: '#e9ecef',
-        borderRadius: 4,
+        borderRadius: 2,
+        marginBottom: 8,
         overflow: 'hidden',
     },
     xpProgressBar: {
         height: '100%',
-        backgroundColor: '#0073FF',
+        backgroundColor: '#2196F3',
+        borderRadius: 2,
     },
     nextLevelText: {
-        ...typography.bodyMedium,
+        ...typography.bodySmall,
         color: '#6c757d',
         textAlign: 'right',
     },
     leaderboard: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 12,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#EAEAEA',
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.05,
-        // shadowRadius: 4,
-        // elevation: 3,
-        overflow: 'hidden',
+        flex: 1,
     },
     leaderboardTitle: {
-        ...typography.h2,
+        ...typography.h3,
         color: '#212529',
         marginBottom: 16,
     },
     leaderboardContent: {
-        gap: 12,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        padding: 16,
     },
     leaderboardItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
-        backgroundColor: '#f8f9fa',
-        borderRadius: 8,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
     },
     rank: {
         ...typography.bodyLarge,
+        color: '#212529',
+        fontWeight: '600',
         width: 30,
-        fontWeight: 'bold',
-        color: '#007AFF',
     },
     username: {
         ...typography.bodyLarge,
-        flex: 1,
         color: '#212529',
+        flex: 1,
     },
     score: {
         ...typography.bodyLarge,
-        fontWeight: '600',
-        color: '#28a745',
+        color: '#6c757d',
     },
 });

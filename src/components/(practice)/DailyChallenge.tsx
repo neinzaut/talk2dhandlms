@@ -42,58 +42,57 @@ const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Daily Challenge</Text>
-                <Text style={styles.subtitle}>Complete 5 signs to finish today's challenge!</Text>
-                <View style={styles.progressContainer}>
-                    <View style={styles.progressBarContainer}>
-                        <View style={styles.progressBarBackground}>
-                            <View 
-                                style={[
-                                    styles.progressBarFill,
-                                    { width: `${(challengesCompleted / 5) * 100}%` }
-                                ]} 
-                            />
+            <View style={styles.content}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Daily Challenge</Text>
+                    <Text style={styles.subtitle}>Complete today's sign language challenge</Text>
+                    <View style={styles.progressContainer}>
+                        <View style={styles.progressBarContainer}>
+                            <View style={styles.progressBarBackground}>
+                                <View 
+                                    style={[
+                                        styles.progressBarFill,
+                                        { width: `${(challengesCompleted / 5) * 100}%` }
+                                    ]} 
+                                />
+                            </View>
+                            <Text style={styles.progressText}>
+                                {challengesCompleted}/5
+                            </Text>
                         </View>
-                        <Text style={styles.progressText}>
-                            {challengesCompleted}/5
-                        </Text>
                     </View>
-                    <Text style={styles.scoreText}>
-                        Score: {score}
-                    </Text>
                 </View>
-            </View>
 
-            {!isComplete ? (
-                <View style={styles.challengeContainer}>
-                    <Text style={styles.challengeText}>
-                        Show the sign for: {currentChallenge}
-                    </Text>
-                    <SignRecognitionPractice
-                        targetSign={currentChallenge}
-                        onPrediction={handlePrediction}
-                    />
-                </View>
-            ) : (
-                <View style={styles.completionContainer}>
-                    <Text style={styles.completionTitle}>Challenge Complete! 🎉</Text>
-                    <Text style={styles.completionText}>
-                        You completed today's challenge with a score of {score}/5
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.newChallengeButton}
-                        onPress={() => {
-                            setScore(0);
-                            setChallengesCompleted(0);
-                            setIsComplete(false);
-                            setCurrentChallenge(generateChallenge());
-                        }}
-                    >
-                        <Text style={styles.newChallengeButtonText}>Try Again</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+                {!isComplete ? (
+                    <View style={styles.challengeContainer}>
+                        <Text style={styles.challengeText}>
+                            Show the sign for: {currentChallenge}
+                        </Text>
+                        <SignRecognitionPractice
+                            targetSign={currentChallenge}
+                            onPrediction={handlePrediction}
+                        />
+                    </View>
+                ) : (
+                    <View style={styles.completionContainer}>
+                        <Text style={styles.completionTitle}>Challenge Complete! 🎉</Text>
+                        <Text style={styles.completionText}>
+                            You completed today's challenge with a score of {score}/5
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.newChallengeButton}
+                            onPress={() => {
+                                setScore(0);
+                                setChallengesCompleted(0);
+                                setIsComplete(false);
+                                setCurrentChallenge(generateChallenge());
+                            }}
+                        >
+                            <Text style={styles.newChallengeButtonText}>Try Again</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
         </View>
     );
 };
@@ -102,10 +101,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: 20,
+    },
+    content: {
+        flex: 1,
     },
     header: {
-        marginBottom: 20,
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#dee2e6',
     },
     title: {
         ...typography.h1,
@@ -127,7 +130,6 @@ const styles = StyleSheet.create({
     progressBarContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
     },
     progressBarBackground: {
         flex: 1,
@@ -148,20 +150,14 @@ const styles = StyleSheet.create({
         minWidth: 40,
         textAlign: 'right',
     },
-    scoreText: {
-        ...typography.bodyLarge,
-        color: '#495057',
-        textAlign: 'right',
-    },
     challengeContainer: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        padding: 20,
     },
     challengeText: {
         ...typography.h2,
         color: '#212529',
-        marginBottom: 24,
+        marginBottom: 20,
         textAlign: 'center',
     },
     completionContainer: {

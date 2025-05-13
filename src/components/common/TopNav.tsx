@@ -3,12 +3,14 @@ import { View, Image, Text, TouchableOpacity, StyleSheet, Pressable } from 'reac
 import DropdownMenu from './DropdownMenu';
 //import LanguageContext from './LanguageContext';
 import { useLanguage } from './LanguageContext';
+import { useStreak } from './StreakContext';
 import UserDropdown from './UserDropdown';
 
 type SignLanguage = 'ASL' | 'FSL';
 
 const TopNav: React.FC = () => {
   const { selectedLanguage, setSelectedLanguage } = useLanguage();
+  const { streakCount } = useStreak();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const dropdownRef = useRef<View>(null);
 
@@ -50,8 +52,12 @@ const TopNav: React.FC = () => {
     <View style={styles.nav}>
       <Image source={require('../../assets/icons/logo.png')} style={styles.logo} />
       <View style={styles.navLinks}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navLink}>Streak</Text>
+        <TouchableOpacity style={styles.streakContainer}>
+          <Image 
+            source={require('../../assets/icons/streak.png')} 
+            style={styles.streakIcon}
+          />
+          <Text style={styles.streakText}>{streakCount} Day{streakCount !== 1 ? 's' : ''} Streak</Text>
         </TouchableOpacity>
 
         <View ref={dropdownRef} style={styles.languageSelector}>
@@ -170,6 +176,25 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     marginLeft: 'auto',
+  },
+  streakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginLeft: 20,
+  },
+  streakIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 6,
+  },
+  streakText: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

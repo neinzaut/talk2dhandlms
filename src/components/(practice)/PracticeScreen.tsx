@@ -1,16 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useLanguage } from '../common/LanguageContext';
 import { typography } from '../../constants/typography';
 import { useRouter } from 'expo-router';
 import DailyChallenge from './DailyChallenge';
 import MatchingGame from './MatchingGame';
 import PracticeByAudio from './PracticeByAudio';
+import { useStreak } from '../common/StreakContext';
 
 const PracticeScreen: React.FC = () => {
     const { selectedLanguage } = useLanguage();
     const router = useRouter();
     const [activePractice, setActivePractice] = React.useState<string | null>(null);
+    const { streakCount } = useStreak();
+    console.log('Streak in TopNav:', streakCount);
 
     const practiceCategories = [
         {
@@ -37,7 +40,36 @@ const PracticeScreen: React.FC = () => {
         setActivePractice(null);
     };
 
-    if (activePractice) {
+    const renderPracticeContent = () => {
+        if (!activePractice) {
+            return (
+                <ScrollView style={styles.content}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Practice</Text>
+                        <Text style={styles.subtitle}>Choose a practice mode to improve your skills</Text>
+                    </View>
+
+                    <View style={styles.categoriesContainer}>
+                        {practiceCategories.map((category) => (
+                            <TouchableOpacity
+                                key={category.id}
+                                style={styles.categoryCard}
+                                onPress={() => setActivePractice(category.id)}
+                            >
+                                <View style={styles.categoryIconContainer}>
+                                    <Text style={styles.categoryIcon}>{category.icon}</Text>
+                                </View>
+                                <View style={styles.categoryContent}>
+                                    <Text style={styles.categoryTitle}>{category.title}</Text>
+                                    <Text style={styles.categoryDescription}>{category.description}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </ScrollView>
+            );
+        }
+
         switch (activePractice) {
             case 'daily-challenge':
                 return <DailyChallenge onComplete={handlePracticeComplete} />;
@@ -48,40 +80,23 @@ const PracticeScreen: React.FC = () => {
             default:
                 return null;
         }
-    }
+    };
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Practice</Text>
-                <Text style={styles.subtitle}>Choose a practice mode to improve your skills</Text>
-            </View>
-
-            <View style={styles.categoriesContainer}>
-                {practiceCategories.map((category) => (
-                    <TouchableOpacity
-                        key={category.id}
-                        style={styles.categoryCard}
-                        onPress={() => setActivePractice(category.id)}
-                    >
-                        <View style={styles.categoryIconContainer}>
-                            <Text style={styles.categoryIcon}>{category.icon}</Text>
-                        </View>
-                        <View style={styles.categoryContent}>
-                            <Text style={styles.categoryTitle}>{category.title}</Text>
-                            <Text style={styles.categoryDescription}>{category.description}</Text>
-                        </View>
-                    </TouchableOpacity>
-                ))}
-            </View>
-        </ScrollView>
+        <View style={styles.contentArea}>
+            {renderPracticeContent()}
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    contentArea: {
         flex: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        flexDirection: 'column',
+        padding: 20,
+    },
+    content: {
+        flex: 1,
     },
     header: {
         padding: 20,

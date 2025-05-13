@@ -215,7 +215,7 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
 
     if (showLevels) {
         return (
-            <View style={styles.container}>
+            <View style={styles.content}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Select Level</Text>
                     <Text style={styles.subtitle}>Choose a difficulty level to practice</Text>
@@ -238,7 +238,7 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={styles.content}>
             <View style={styles.header}>
                 <Text style={styles.title}>Practice by Audio</Text>
                 <Text style={styles.subtitle}>Say the letter shown in the sign!</Text>
@@ -331,13 +331,13 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
+    content: {
         flex: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: 20,
     },
     header: {
-        marginBottom: 20,
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#dee2e6',
     },
     title: {
         ...typography.h1,
@@ -389,6 +389,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        padding: 20,
     },
     signContainer: {
         width: 200,
@@ -479,6 +480,7 @@ const styles = StyleSheet.create({
     },
     levelsContainer: {
         flex: 1,
+        padding: 20,
     },
     levelCard: {
         backgroundColor: '#fff',

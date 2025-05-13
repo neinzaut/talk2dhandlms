@@ -118,7 +118,7 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={styles.content}>
             <View style={styles.header}>
                 <Text style={styles.title}>Matching Game</Text>
                 <View style={styles.statsContainer}>
@@ -173,13 +173,13 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
+    content: {
         flex: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: 20,
     },
     header: {
-        marginBottom: 20,
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#dee2e6',
     },
     title: {
         ...typography.h1,
@@ -201,6 +201,7 @@ const styles = StyleSheet.create({
     },
     cardsContainer: {
         flex: 1,
+        padding: 20,
     },
     cardsGrid: {
         flexDirection: 'row',
