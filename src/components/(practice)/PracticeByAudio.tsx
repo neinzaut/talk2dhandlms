@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ProgressBarAndroid } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useLanguage } from '../common/LanguageContext';
 import { typography } from '../../constants/typography';
 import { Audio } from 'expo-av';
@@ -193,13 +193,14 @@ const PracticeByAudio: React.FC<PracticeByAudioProps> = ({ onComplete }) => {
                 <Text style={styles.subtitle}>Say the letter shown in the sign!</Text>
                 <View style={styles.progressContainer}>
                     <View style={styles.progressBarContainer}>
-                        <ProgressBarAndroid 
-                            progress={score / 5} 
-                            styleAttr="Horizontal"
-                            indeterminate={false}
-                            color="#2196F3"
-                            style={styles.progressBar}
-                        />
+                        <View style={styles.progressBarBackground}>
+                            <View 
+                                style={[
+                                    styles.progressBarFill,
+                                    { width: `${(score / 5) * 100}%` }
+                                ]} 
+                            />
+                        </View>
                         <Text style={styles.progressText}>
                             {score}/5
                         </Text>
@@ -309,10 +310,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 8,
     },
-    progressBar: {
+    progressBarBackground: {
         flex: 1,
         height: 8,
+        backgroundColor: '#e9ecef',
+        borderRadius: 4,
         marginRight: 8,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: '#2196F3',
+        borderRadius: 4,
     },
     progressText: {
         ...typography.bodyLarge,
