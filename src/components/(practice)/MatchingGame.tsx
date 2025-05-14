@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Animated } from 'react-native';
 import { useLanguage } from '../common/LanguageContext';
 import { typography } from '../../constants/typography';
 import { getSignImages } from '../../utils/imageUtils';
@@ -24,6 +24,9 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
     const [score, setScore] = useState(0);
     const [moves, setMoves] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
+    const [showPreview, setShowPreview] = useState(true);
+    const [previewCards, setPreviewCards] = useState<Card[]>([]);
+    const previewOpacity = useRef(new Animated.Value(1)).current;
 
     // Initialize the game
     useEffect(() => {
@@ -44,7 +47,7 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
             type: 'sign',
             value: letter,
             image: getSignImages(selectedLanguage, [letter], 'labelled')[0]?.path,
-            isFlipped: false,
+            isFlipped: true, // Face up for preview
             isMatched: false,
         }));
 
@@ -53,17 +56,36 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
             id: `letter-${letter}`,
             type: 'letter',
             value: letter,
-            isFlipped: false,
+            isFlipped: true, // Face up for preview
             isMatched: false,
         }));
 
-        // Combine and shuffle cards
-        const allCards = [...signCards, ...letterCards].sort(() => Math.random() - 0.5);
-        setCards(allCards);
-        setFlippedCards([]);
+        // For preview, show all cards in correct pairs
+        const previewPairs: Card[] = [];
+        for (let i = 0; i < signCards.length; i++) {
+            previewPairs.push(signCards[i], letterCards[i]);
+        }
+        setPreviewCards(previewPairs);
+        setShowPreview(true);
+        setIsComplete(false);
         setScore(0);
         setMoves(0);
-        setIsComplete(false);
+        setFlippedCards([]);
+
+        // After 2 seconds, fade out preview, then shuffle and start the game
+        setTimeout(() => {
+            Animated.timing(previewOpacity, {
+                toValue: 0,
+                duration: 400,
+                useNativeDriver: true,
+            }).start(() => {
+                const allCards = [...signCards, ...letterCards].map(card => ({ ...card, isFlipped: false }));
+                const shuffled = allCards.sort(() => Math.random() - 0.5);
+                setCards(shuffled);
+                setShowPreview(false);
+                previewOpacity.setValue(1); // Reset for next game
+            });
+        }, 2000);
     };
 
     const handleCardPress = (card: Card) => {
@@ -117,6 +139,11 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
         }
     };
 
+    // For rendering, use previewCards if showPreview, else use cards
+    const signCards = (showPreview ? previewCards : cards).filter(card => card.type === 'sign');
+    const letterCards = (showPreview ? previewCards : cards).filter(card => card.type === 'letter');
+    const pairs = signCards.map((signCard, idx) => [signCard, letterCards[idx]]);
+
     return (
         <View style={styles.content}>
             <View style={styles.header}>
@@ -128,32 +155,48 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ onComplete }) => {
             </View>
 
             {!isComplete ? (
-                <ScrollView style={styles.cardsContainer}>
-                    <View style={styles.cardsGrid}>
-                        {cards.map(card => (
-                            <TouchableOpacity
-                                key={card.id}
-                                style={[
-                                    styles.card,
-                                    card.isFlipped && styles.cardFlipped,
-                                    card.isMatched && styles.cardMatched
-                                ]}
-                                onPress={() => handleCardPress(card)}
-                                disabled={card.isMatched}
-                            >
-                                {card.isFlipped ? (
-                                    card.type === 'sign' ? (
-                                        <Image source={card.image} style={styles.signImage} />
+                <View style={styles.cardsContainer}>
+                    <Animated.View style={[styles.pairedRowsWrapper, showPreview && { opacity: previewOpacity }]}> 
+                        {pairs.map(([signCard, letterCard], idx) => (
+                            <View key={idx} style={styles.pairRow}>
+                                {/* Sign card (left) */}
+                                <TouchableOpacity
+                                    style={[
+                                        styles.card,
+                                        signCard.isFlipped && styles.cardFlipped,
+                                        signCard.isMatched && styles.cardMatched
+                                    ]}
+                                    onPress={() => !showPreview && handleCardPress(signCard)}
+                                    disabled={signCard.isMatched || showPreview}
+                                >
+                                    {signCard.isFlipped ? (
+                                        <Image source={signCard.image} style={styles.signImage} />
                                     ) : (
-                                        <Text style={styles.letterText}>{card.value}</Text>
-                                    )
-                                ) : (
-                                    <Text style={styles.cardBack}>?</Text>
-                                )}
-                            </TouchableOpacity>
+                                        <Text style={styles.cardBack}>?</Text>
+                                    )}
+                                </TouchableOpacity>
+                                {/* Divider */}
+                                <View style={styles.divider} />
+                                {/* Letter card (right) */}
+                                <TouchableOpacity
+                                    style={[
+                                        styles.card,
+                                        letterCard.isFlipped && styles.cardFlipped,
+                                        letterCard.isMatched && styles.cardMatched
+                                    ]}
+                                    onPress={() => !showPreview && handleCardPress(letterCard)}
+                                    disabled={letterCard.isMatched || showPreview}
+                                >
+                                    {letterCard.isFlipped ? (
+                                        <Text style={styles.letterText}>{letterCard.value}</Text>
+                                    ) : (
+                                        <Text style={styles.cardBack}>?</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
                         ))}
-                    </View>
-                </ScrollView>
+                    </Animated.View>
+                </View>
             ) : (
                 <View style={styles.completionContainer}>
                     <Text style={styles.completionTitle}>Game Complete! 🎉</Text>
@@ -203,21 +246,33 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
     },
-    cardsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
+    pairedRowsWrapper: {
+        marginTop: 32,
         gap: 16,
     },
+    pairRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 24,
+    },
+    divider: {
+        width: 2,
+        height: 40,
+        backgroundColor: '#D9D9D9',
+        marginHorizontal: 12,
+        borderRadius: 1,
+    },
     card: {
-        width: '30%',
-        aspectRatio: 1,
+        width: 60,
+        height: 60,
         backgroundColor: '#e9ecef',
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#dee2e6',
+        marginBottom: 12,
     },
     cardFlipped: {
         backgroundColor: '#fff',
@@ -231,8 +286,8 @@ const styles = StyleSheet.create({
         color: '#6c757d',
     },
     signImage: {
-        width: '80%',
-        height: '80%',
+        width: 40,
+        height: 40,
         resizeMode: 'contain',
     },
     letterText: {
