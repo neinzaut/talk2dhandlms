@@ -152,8 +152,8 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     cameraContainer: {
         width: '100%',
-        maxWidth: 1000,
-        height: '45%',
+        maxWidth: 900,
+        height: '50%',
         aspectRatio: 16/9,
         marginBottom: 20,
         borderRadius: 12,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
     } as ViewStyle,
     inputContainer: {
-        width: '100%',
+        width: '60%',
         marginBottom: 16,
     } as ViewStyle,
     inputWrapper: {
@@ -257,7 +257,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         padding: 16,
-        backgroundColor: '#f8f9fa',
         borderRadius: 8,
     } as ViewStyle,
     progressText: {
