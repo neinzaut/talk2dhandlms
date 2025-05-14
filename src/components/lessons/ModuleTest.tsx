@@ -206,11 +206,24 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
         );
     };
 
+    // Sticky header with title, hearts, and timer
+    const renderHeader = () => (
+        <View style={styles.stickyHeader}>
+            <Text style={styles.headerTitle}>Module Test</Text>
+            <View style={styles.headerRow}>
+                {renderHearts()}
+                <View style={styles.timerBadge}>
+                    <Text style={styles.timerBadgeText}>{timer}s</Text>
+                </View>
+            </View>
+        </View>
+    );
+
     const renderContent = () => {
         if (!isStarted) {
             return (
                 <View style={styles.container}>
-                    <Text style={styles.title}>Module Test</Text>
+                    {renderHeader()}
                     <Text style={styles.description}>
                         Test your knowledge of the signs you've learned!
                     </Text>
@@ -225,13 +238,24 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
         }
 
         if (showResults) {
-            return renderResults();
+            return (
+                <View style={styles.resultsContainer}>
+                    {renderHeader()}
+                    <ScrollView contentContainerStyle={styles.resultsScrollContent} showsVerticalScrollIndicator={false}>
+                        {renderResults()}
+                        <TouchableOpacity style={styles.startButton} onPress={() => { setIsStarted(false); setShowResults(false); }}>
+                            <Text style={styles.startButtonText}>Try Again</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+                </View>
+            );
         }
 
         const currentItem = testItems[currentItemIndex];
         if (!currentItem) {
             return (
                 <View style={styles.container}>
+                    {renderHeader()}
                     <Text style={styles.title}>Loading test items...</Text>
                     <Text style={styles.description}>
                         Please wait while we prepare your test...
@@ -242,35 +266,32 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
 
         return (
             <ScrollView style={styles.scrollView}>
+                {renderHeader()}
                 <View style={styles.content}>
-                    {renderHearts()}
-                    
-                    {showPreview ? (
-                        renderPreview()
-                    ) : (
-                        <>
-                            <View style={[
-                                styles.cameraContainer,
-                                isCorrect && styles.correctSign
-                            ]}>
-                                <SignRecognitionPractice
-                                    targetSign={currentItem.sign}
-                                    onPrediction={handlePrediction}
-                                />
-                            </View>
-                            <View style={styles.timerContainer}>
-                                <Text style={styles.timerText}>{timer}s</Text>
-                            </View>
-                        </>
-                    )}
-
-                    <View style={styles.progressContainer}>
-                        <Text style={styles.progressText}>
-                            {currentItem.type === 'letter' ? 'Letter' : 'Number'}: {currentItem.sign}
-                        </Text>
-                        <Text style={styles.progressCount}>
-                            {currentItemIndex + 1} of {testItems.length}
-                        </Text>
+                    <View style={styles.card}>
+                        {showPreview ? (
+                            renderPreview()
+                        ) : (
+                            <>
+                                <View style={[
+                                    styles.cameraContainer,
+                                    isCorrect && styles.correctSign
+                                ]}>
+                                    <SignRecognitionPractice
+                                        targetSign={currentItem.sign}
+                                        onPrediction={handlePrediction}
+                                    />
+                                </View>
+                                <View style={styles.progressContainer}>
+                                    <Text style={styles.progressText}>
+                                        {currentItem.type === 'letter' ? 'Letter' : 'Number'}: {currentItem.sign}
+                                    </Text>
+                                    <Text style={styles.progressCount}>
+                                        {currentItemIndex + 1} of {testItems.length}
+                                    </Text>
+                                </View>
+                            </>
+                        )}
                     </View>
                 </View>
             </ScrollView>
@@ -460,4 +481,55 @@ const styles = StyleSheet.create({
         fontSize: 72,
         marginBottom: 20,
     } as TextStyle,
+    stickyHeader: {
+        width: '100%',
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+        alignItems: 'center',
+        marginBottom: 16,
+    } as ViewStyle,
+    headerTitle: {
+        ...typography.h1,
+        color: '#212529',
+        marginBottom: 8,
+    } as TextStyle,
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 24,
+    } as ViewStyle,
+    timerBadge: {
+        backgroundColor: '#2196F3',
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+        marginLeft: 16,
+    } as ViewStyle,
+    timerBadgeText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 18,
+    } as TextStyle,
+    card: {
+        width: '100%',
+        maxWidth: 500,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        marginVertical: 24,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+    } as ViewStyle,
+    resultsScrollContent: {
+        alignItems: 'center',
+        paddingBottom: 40,
+    } as ViewStyle,
 });
