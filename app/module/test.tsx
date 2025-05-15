@@ -21,8 +21,9 @@ export default function ModuleTestScreen() {
   const { selectedLanguage } = useLanguage();
   
   // Extract module number from the ID (e.g., 'asl-1' -> 1)
-  const moduleId = params.moduleId as string;
-  const moduleNumber = parseInt(moduleId.split('-')[1], 10);
+  const moduleIdString = params.moduleId as string;
+  const sublessonIdString = params.sublessonId as string; // Get sublessonId
+  const moduleNumber = parseInt(moduleIdString.split('-')[1], 10);
   
   if (isNaN(moduleNumber)) {
     return (
@@ -32,7 +33,7 @@ export default function ModuleTestScreen() {
     );
   }
 
-  return <ModuleTest moduleId={moduleNumber} />;
+  return <ModuleTest moduleIdString={moduleIdString} sublessonIdString={sublessonIdString} moduleNumber={moduleNumber} />;
 }
 
 const styles = StyleSheet.create({

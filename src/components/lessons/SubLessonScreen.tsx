@@ -16,7 +16,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLessons } from '../../hooks/useLessons';
 import { useLanguage } from '../common/LanguageContext';
@@ -27,6 +27,7 @@ import { SignRecognitionPractice } from '../(practice)/SignRecognitionPractice';
 import { getSignImages, getSignImage, SignImage } from '../../utils/imageUtils';
 import { NumbersSubLesson } from './NumbersSubLesson';
 import { FingerSpellingSubLesson } from './FingerSpellingSubLesson';
+import { WebView } from 'react-native-webview';
 
 export const SubLessonScreen: React.FC = () => {
     const { moduleId, sublessonId, title, language } = useLocalSearchParams<{ moduleId: string; sublessonId: string; title: string; language: string }>();
@@ -157,6 +158,111 @@ export const SubLessonScreen: React.FC = () => {
                 params: { moduleId, sublessonId, title: module.title }
             });
             return null;
+        }
+
+        // Specific handling for fsl-2 dynamic gestures
+        if (moduleId === 'fsl-2' && sublesson.id === 'fsl-2-1') {
+            console.log("[SubLessonScreen] Rendering content for Dynamic Gestures (fsl-2-1)");
+            if (Platform.OS === 'web') {
+                console.log("[SubLessonScreen] Platform is web, rendering iframe for fsl-2-1");
+                // Use an iframe for web platform
+                return (
+                    <View style={styles.webViewContainer}> 
+                        <iframe
+                            src="http://localhost:5000" // URL of your Flask app
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                            }}
+                            title="Dynamic Gesture Practice"
+                            allow="camera; microphone" // Explicitly allow camera and microphone access
+                        />
+                    </View>
+                );
+            } else {
+                // Use WebView for native platforms (iOS, Android)
+                console.log("[SubLessonScreen] Platform is native, rendering WebView for fsl-2-1");
+                return (
+                    <View style={styles.webViewContainer}>
+                        <WebView
+                            source={{ uri: 'http://localhost:5000' }} // URL of your Flask app
+                            style={styles.webView}
+                            javaScriptEnabled={true}
+                            domStorageEnabled={true}
+                            allowsInlineMediaPlayback={true}
+                            mediaPlaybackRequiresUserAction={false}
+                            allowsProtectedMedia={true}
+                            originWhitelist={['*']}
+                            onError={(syntheticEvent) => {
+                                const { nativeEvent } = syntheticEvent;
+                                console.warn('WebView error: ', nativeEvent);
+                            }}
+                            onLoad={() => console.log("WebView content loaded")}
+                            onHttpError={(syntheticEvent) => {
+                                const { nativeEvent } = syntheticEvent;
+                                console.warn(
+                                    'WebView HTTP error: ',
+                                    nativeEvent.statusCode,
+                                    nativeEvent.url,
+                                );
+                            }}
+                        />
+                    </View>
+                );
+            }
+        }
+
+        // Specific handling for fsl-2 localized terms
+        if (moduleId === 'fsl-2' && sublesson.id === 'fsl-2-2') {
+            console.log("[SubLessonScreen] Rendering content for Localized Terms (fsl-2-2)");
+            if (Platform.OS === 'web') {
+                console.log("[SubLessonScreen] Platform is web, rendering iframe for fsl-2-2 to port 5000");
+                return (
+                    <View style={styles.webViewContainer}>
+                        <iframe
+                            src="http://localhost:5000"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                            }}
+                            title="Localized Terms Practice"
+                            allow="camera; microphone"
+                        />
+                    </View>
+                );
+            } else {
+                // Use WebView for native platforms (iOS, Android)
+                console.log("[SubLessonScreen] Platform is native, rendering WebView for fsl-2-2 to port 5000");
+                return (
+                    <View style={styles.webViewContainer}>
+                        <WebView
+                            source={{ uri: 'http://localhost:5000' }}
+                            style={styles.webView}
+                            javaScriptEnabled={true}
+                            domStorageEnabled={true}
+                            allowsInlineMediaPlayback={true}
+                            mediaPlaybackRequiresUserAction={false}
+                            allowsProtectedMedia={true}
+                            originWhitelist={['*']}
+                            onError={(syntheticEvent) => {
+                                const { nativeEvent } = syntheticEvent;
+                                console.warn('WebView error (fsl-2-2): ', nativeEvent);
+                            }}
+                            onLoad={() => console.log("WebView content loaded (fsl-2-2)")}
+                            onHttpError={(syntheticEvent) => {
+                                const { nativeEvent } = syntheticEvent;
+                                console.warn(
+                                    'WebView HTTP error (fsl-2-2): ',
+                                    nativeEvent.statusCode,
+                                    nativeEvent.url,
+                                );
+                            }}
+                        />
+                    </View>
+                );
+            }
         }
 
         if (sublesson.type === 'practice') {
@@ -384,5 +490,16 @@ const styles = StyleSheet.create({
     warningButtonText: {
         ...typography.button,
         color: '#fff',
+    },
+    webViewContainer: {
+        flex: 1,
+        width: '100%',
+        minHeight: 800,
+        height: 'auto',
+        alignSelf: 'stretch',
+        backgroundColor: '#f0f0f0',
+    },
+    webView: {
+        flex: 1,
     },
 }); 

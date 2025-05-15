@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ViewStyle, TextStyle, ImageStyle, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ViewStyle, TextStyle, ImageStyle, ImageBackground, Platform } from 'react-native';
 import { SignRecognitionPractice, SignRecognitionPracticeRef } from '../(practice)/SignRecognitionPractice';
 import { getSignImage } from '../../utils/imageUtils';
 import { typography } from '../../constants/typography';
 import { useLanguage } from '../common/LanguageContext';
+import { WebView } from 'react-native-webview';
 
 const TEST_DURATION_PER_ITEM = 10; // Seconds per item
 const PREDICTION_HISTORY_SIZE = 3;
 const REQUIRED_CONFIDENCE = 0.6; // Minimum confidence to consider a prediction valid for matching
 
 interface ModuleTestProps {
-    moduleId: number;
+    moduleIdString: string;
+    sublessonIdString: string;
+    moduleNumber: number;
     onComplete?: (finalScore: number, mistakes: string[]) => void; // Include mistakes in onComplete
 }
 
@@ -22,7 +25,9 @@ interface TestItem {
 }
 
 export const ModuleTest: React.FC<ModuleTestProps> = ({
-    moduleId,
+    moduleIdString,
+    sublessonIdString,
+    moduleNumber,
     onComplete
 }) => {
     const { selectedLanguage } = useLanguage();
@@ -48,10 +53,60 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
     // const successSoundRef = useRef<Audio.Sound | null>(null);
     // const failureSoundRef = useRef<Audio.Sound | null>(null);
 
+    // Condition for fsl-2 dynamic gesture test (fsl-2-3)
+    if (moduleIdString === 'fsl-2' && sublessonIdString === 'fsl-2-3') {
+        console.log("[ModuleTest] Rendering iframe for FSL-2 Test (fsl-2-3)");
+        if (Platform.OS === 'web') {
+            return (
+                <View style={styles.webViewContainer}> 
+                    <iframe
+                        src="http://localhost:5000" // URL of your Flask app
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            border: 'none',
+                        }}
+                        title="FSL-2 Test Practice"
+                        allow="camera; microphone" // Explicitly allow camera and microphone access
+                    />
+                </View>
+            );
+        } else {
+            // Use WebView for native platforms (iOS, Android)
+            return (
+                <View style={styles.webViewContainer}>
+                    <WebView
+                        source={{ uri: 'http://localhost:5000' }} // URL of your Flask app
+                        style={styles.webView}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        allowsInlineMediaPlayback={true}
+                        mediaPlaybackRequiresUserAction={false}
+                        allowsProtectedMedia={true}
+                        originWhitelist={['*']}
+                        onError={(syntheticEvent) => {
+                            const { nativeEvent } = syntheticEvent;
+                            console.warn('WebView error: ', nativeEvent);
+                        }}
+                        onLoad={() => console.log("WebView content loaded for FSL-2 Test")}
+                        onHttpError={(syntheticEvent) => {
+                            const { nativeEvent } = syntheticEvent;
+                            console.warn(
+                                'WebView HTTP error: ',
+                                nativeEvent.statusCode,
+                                nativeEvent.url,
+                            );
+                        }}
+                    />
+                </View>
+            );
+        }
+    }
+
     // Generate test items (simplified, focusing on Module 1 for now)
     useEffect(() => {
-        if (isTestRunning && moduleId === 1 && testItems.length === 0) { // Only generate once
-            console.log('[ModuleTest] Generating test items for Module 1...');
+        if (isTestRunning && moduleNumber === 1 && testItems.length === 0) { // Only generate once
+            console.log('[ModuleTest] Generating test items for Module 1 (using moduleNumber)...');
             const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             const numbers = Array.from({ length: 10 }, (_, i) => i.toString()); // 0-9
             
@@ -70,7 +125,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({
             setCurrentItemIndex(0); // Ensure we start from the first item
             setTimerValue(TEST_DURATION_PER_ITEM); // Reset timer for the first item
         }
-    }, [isTestRunning, moduleId, testItems.length]);
+    }, [isTestRunning, moduleNumber, testItems.length]);
 
     // Prediction Smoothing Logic (from selfTest.js, adapted)
     useEffect(() => {
@@ -620,7 +675,15 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         borderWidth: 1,
         borderColor: '#E74C3C', // Red border for user's incorrect attempt
-    }
+    },
+    webViewContainer: { // Added style
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    },
+    webView: { // Added style
+        flex: 1,
+    },
 });
 
 // Helper for sounds (optional, can be uncommented and implemented)
