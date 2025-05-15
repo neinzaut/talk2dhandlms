@@ -217,11 +217,11 @@ export const SubLessonScreen: React.FC = () => {
         if (moduleId === 'fsl-2' && sublesson.id === 'fsl-2-2') {
             console.log("[SubLessonScreen] Rendering content for Localized Terms (fsl-2-2)");
             if (Platform.OS === 'web') {
-                console.log("[SubLessonScreen] Platform is web, rendering iframe for fsl-2-2 to port 5000");
+                console.log("[SubLessonScreen] Platform is web, rendering iframe for fsl-2-2 to port 5001");
                 return (
                     <View style={styles.webViewContainer}>
                         <iframe
-                            src="http://localhost:5000"
+                            src="http://localhost:5001" // URL of your new Flask app instance
                             style={{
                                 width: '100%',
                                 height: '100%',
@@ -234,11 +234,11 @@ export const SubLessonScreen: React.FC = () => {
                 );
             } else {
                 // Use WebView for native platforms (iOS, Android)
-                console.log("[SubLessonScreen] Platform is native, rendering WebView for fsl-2-2 to port 5000");
+                console.log("[SubLessonScreen] Platform is native, rendering WebView for fsl-2-2 to port 5001");
                 return (
                     <View style={styles.webViewContainer}>
                         <WebView
-                            source={{ uri: 'http://localhost:5000' }}
+                            source={{ uri: 'http://localhost:5001' }} // URL of your new Flask app instance
                             style={styles.webView}
                             javaScriptEnabled={true}
                             domStorageEnabled={true}
