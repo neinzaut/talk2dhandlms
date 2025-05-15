@@ -15,22 +15,29 @@
  * - Individual sign practice mode
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Platform, Switch } from 'react-native';
 import { Camera } from 'expo-camera';
-import type { CameraCapturedPicture } from 'expo-camera';
+import type { CameraCapturedPicture, CameraType } from 'expo-camera';
 import * as FileSystem from 'expo-file-system';
 import { typography } from '../../constants/typography';
 
 interface SignRecognitionPracticeProps {
-    onPrediction: (prediction: string) => void;
+    onPrediction: (prediction: string, confidence?: number) => void;
     targetSign: string;
+    onSignLearned?: (sign: string) => void;
 }
 
-export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = ({
+// Define the interface for the methods to be exposed via ref
+export interface SignRecognitionPracticeRef {
+  captureCurrentUserAttempt: () => Promise<string | null>;
+}
+
+export const SignRecognitionPractice = forwardRef<SignRecognitionPracticeRef, SignRecognitionPracticeProps>(({
     onPrediction,
     targetSign,
-}) => {
+    onSignLearned,
+}, ref) => {
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [prediction, setPrediction] = useState<string | null>(null);
@@ -45,6 +52,64 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
     const videoRef = useRef<HTMLVideoElement>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const captureIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // New state for timer and feedback
+    const startTimeRef = useRef<number | null>(null);
+    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+    const [timeMessage, setTimeMessage] = useState<string | null>(null);
+    const [showFeedback, setShowFeedback] = useState(false);
+
+    // State for visible timer
+    const [displayedTime, setDisplayedTime] = useState(0);
+    const displayTimerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Ref to hold the latest targetSign for use in interval callbacks
+    const currentTargetSignRef = useRef<string>(targetSign);
+
+    // Expose the capture method
+    useImperativeHandle(ref, () => ({
+        captureCurrentUserAttempt: async () => {
+            if (Platform.OS === 'web') {
+                if (!videoRef.current) {
+                    console.error("[SRP_Snapshot] Video ref not available for capture");
+                    return null;
+                }
+                const canvas = document.createElement('canvas');
+                // Ensure video dimensions are valid
+                if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
+                    console.error("[SRP_Snapshot] Video dimensions are zero, cannot capture.");
+                    return null;
+                }
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error("[SRP_Snapshot] Failed to get canvas context for capture");
+                    return null;
+                }
+                ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                return canvas.toDataURL('image/jpeg');
+            } else {
+                if (!cameraRef.current) {
+                    console.error("[SRP_Snapshot] Camera ref not available for capture");
+                    return null;
+                }
+                try {
+                    console.log("[SRP_Snapshot] Taking picture (native)...");
+                    const photo = await cameraRef.current.takePictureAsync({
+                        quality: 0.5, // Moderate quality to keep size down
+                        base64: true, // Request base64 data
+                        skipProcessing: true, // Faster if no edits needed on native side
+                    });
+                    console.log("[SRP_Snapshot] Picture taken (native).");
+                    return photo.base64 ? `data:image/jpeg;base64,${photo.base64}` : null;
+                } catch (e) {
+                    console.error("[SRP_Snapshot] Failed to take picture (native):", e);
+                    return null;
+                }
+            }
+        }
+    }));
 
     const checkBackendStatus = async () => {
         try {
@@ -164,7 +229,57 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                 captureIntervalRef.current = null;
             }
         };
-    }, [realtimeMode]);
+    }, [realtimeMode, targetSign]);
+
+    useEffect(() => {
+        // Reset feedback and start timer when targetSign changes
+        if (targetSign) {
+            console.log(`[EFFECT_TARGET_SIGN] New target sign received: '${targetSign}' (Length: ${targetSign.length})`);
+            currentTargetSignRef.current = targetSign;
+            setIsCorrect(false); // Reset correct state for new letter
+            setFeedbackMessage(null);
+            setTimeMessage(null);
+            setShowFeedback(false);
+            startTimeRef.current = Date.now();
+            
+            // Visible Timer Logic
+            setDisplayedTime(0);
+            if (displayTimerIntervalRef.current) {
+                clearInterval(displayTimerIntervalRef.current);
+            }
+            displayTimerIntervalRef.current = setInterval(() => {
+                if (startTimeRef.current) {
+                    const newTime = Math.floor((Date.now() - (startTimeRef.current ?? Date.now())) / 1000);
+                    setDisplayedTime(newTime);
+                }
+            }, 1000);
+
+            // Ensure detection is active if in realtime mode
+            if (realtimeMode && !captureIntervalRef.current) {
+                startContinuousDetection();
+            }
+        } else {
+            // If no target sign, clear timer and displayed time
+            startTimeRef.current = null;
+            if (displayTimerIntervalRef.current) {
+                clearInterval(displayTimerIntervalRef.current);
+                displayTimerIntervalRef.current = null;
+            }
+            setDisplayedTime(0);
+        }
+        
+        // Always reset these states when targetSign changes
+        setLastPrediction(null);
+        setPrediction(null);
+        setIsCorrect(false);
+        
+        return () => {
+            if (displayTimerIntervalRef.current) {
+                clearInterval(displayTimerIntervalRef.current);
+                displayTimerIntervalRef.current = null;
+            }
+        };
+    }, [targetSign, realtimeMode]);
 
     const startContinuousDetection = async () => {
         if (captureIntervalRef.current) {
@@ -243,13 +358,82 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                     setPrediction(data.prediction);
                     setLastPrediction(data.prediction);
                     setConfidence(data.confidence);
-                    const isMatch = data.prediction === targetSign;
-                    setIsCorrect(isMatch);
                     
-                    onPrediction(data.prediction);
+                    // Use the ref for the most current targetSign
+                    const currentTarget = currentTargetSignRef.current;
+                    console.log(`[CAPTURE_PREDICT] Comparing: Backend prediction: '${data.prediction}' (Length: ${data.prediction.length}), Current Target (from ref): '${currentTarget}' (Length: ${currentTarget ? currentTarget.length : 'null'})`);
+                    
+                    // Case-insensitive comparison using the ref
+                    const isMatch = !!(currentTarget && data.prediction && currentTarget.toLowerCase() === data.prediction.toLowerCase());
+                    console.log(`[CAPTURE_PREDICT] Is match? ${isMatch}. Current isCorrect state: ${isCorrect}`);
+                    
+                    // Log detailed matching information
+                    if (currentTarget) {
+                        console.log(`[CAPTURE_PREDICT] Detailed matching:
+                        Target: '${currentTarget}' (${currentTarget.toLowerCase()})
+                        Prediction: '${data.prediction}' (${data.prediction.toLowerCase()})
+                        Match?: ${data.prediction.toLowerCase() === currentTarget.toLowerCase()}
+                        Confidence: ${data.confidence ? (data.confidence * 100).toFixed(1) + '%' : 'n/a'}`);
+                    }
+                    
+                    if (isMatch && !isCorrect) {
+                        console.log(`[CAPTURE_PREDICT] ✅ CORRECT MATCH DETECTED for ${currentTarget}!`);
+                        setIsCorrect(true);
+                        
+                        if (onSignLearned) {
+                            console.log(`[CAPTURE_PREDICT] 📣 Calling onSignLearned for ${currentTarget}`);
+                            
+                            // Temporarily pause predictions to allow state transitions
+                            if (captureIntervalRef.current) {
+                                clearInterval(captureIntervalRef.current);
+                                captureIntervalRef.current = null;
+                            }
+                            
+                            // Call onSignLearned first, then delay before resuming predictions
+                            onSignLearned(currentTarget);
+                            
+                            // Extended pause to allow state changes to complete fully
+                            // Using a longer timeout ensures the completion state has time to propagate
+                            setTimeout(() => {
+                                if (realtimeMode && isCameraActive) {
+                                    console.log(`[CAPTURE_PREDICT] Resuming detection after match`);
+                                    startContinuousDetection();
+                                }
+                            }, 4000); // Extended to 4 seconds to give more time for state changes
+                        } else {
+                            console.warn(`[CAPTURE_PREDICT] ⚠️ onSignLearned callback is not defined!`);
+                        }
+
+                        // Clear the display timer interval
+                        if (displayTimerIntervalRef.current) {
+                            clearInterval(displayTimerIntervalRef.current);
+                            displayTimerIntervalRef.current = null;
+                        }
+
+                        if (startTimeRef.current) {
+                            const elapsedTime = (Date.now() - startTimeRef.current) / 1000;
+                            setFeedbackMessage("Correct!");
+                            if (elapsedTime <= 5) {
+                                setTimeMessage("Good job, you're learning quick!");
+                            } else if (elapsedTime <= 10) {
+                                setTimeMessage("You're learning well! Keep at it!");
+                            } else {
+                                setTimeMessage("Some signs take time, you got this!");
+                            }
+                            setShowFeedback(true);
+                        }
+                    } else if (isMatch && isCorrect) {
+                        console.log(`[CAPTURE_PREDICT] Match found but already marked correct`);
+                    } else if (!isMatch) {
+                        console.log(`[CAPTURE_PREDICT] No match: '${data.prediction}' ≠ '${currentTarget}'`);
+                    }
+                    
+                    onPrediction(data.prediction, data.confidence);
+                } else {
+                    console.log('Prediction not successful or no data: ', data.error || 'No specific error');
                 }
-            } catch (parseErr) {
-                console.error('Failed to parse prediction response:', parseErr);
+            } catch (parseError) {
+                console.error('Error parsing prediction response:', parseError, rawResponseText);
             }
         } catch (err: any) {
             console.error('Error in real-time processing:', err);
@@ -340,10 +524,11 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                     setConfidence(data.confidence);
                     setAnnotatedImage(data.annotated_image);
                     
-                    const isMatch = data.prediction === targetSign;
+                    // Ensure isMatch is strictly boolean
+                    const isMatch = !!(targetSign && data.prediction && targetSign.toLowerCase() === data.prediction.toLowerCase());
                     setIsCorrect(isMatch);
                     
-                    onPrediction(data.prediction);
+                    onPrediction(data.prediction, data.confidence);
                 } else {
                     console.error('❌ Prediction error:', data.error);
                     setError(data.error || 'Failed to process image');
@@ -359,6 +544,8 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
             setIsProcessing(false);
         }
     };
+
+    const showTryAgain = prediction && targetSign && prediction !== targetSign && !isCorrect && !showFeedback;
 
     if (hasPermission === null) {
         return <View style={styles.container}><Text>Requesting camera permission...</Text></View>;
@@ -390,7 +577,7 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                         <Camera
                             ref={cameraRef}
                             style={styles.camera}
-                            type="front"
+                            type={"front"}
                         />
                     )
                 ) : null}
@@ -407,7 +594,15 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                         <Text style={styles.realtimeModeText}>Real-time detection:</Text>
                         <Switch
                             value={realtimeMode}
-                            onValueChange={(value) => setRealtimeMode(value)}
+                            onValueChange={(value) => {
+                                setRealtimeMode(value);
+                                if (!value && captureIntervalRef.current) {
+                                    clearInterval(captureIntervalRef.current);
+                                    captureIntervalRef.current = null;
+                                } else if (value && targetSign && isCameraActive && hasPermission) {
+                                    startContinuousDetection();
+                                }
+                            }}
                             trackColor={{ false: '#767577', true: '#4CAF50' }}
                             thumbColor={realtimeMode ? '#fff' : '#f4f3f4'}
                         />
@@ -479,9 +674,31 @@ export const SignRecognitionPractice: React.FC<SignRecognitionPracticeProps> = (
                     )}
                 </View>
             </View>
+
+            {Platform.OS !== 'web' && (
+                <TouchableOpacity onPress={() => setIsCameraActive(!isCameraActive)} style={styles.toggleButton}>
+                    <Text style={styles.buttonText}>{isCameraActive ? 'Pause Camera' : 'Resume Camera'}</Text>
+                </TouchableOpacity>
+            )}
+
+            {showFeedback && feedbackMessage && (
+                <View style={styles.feedbackContainer}>
+                    <Text style={[styles.feedbackText, isCorrect ? styles.correctText : styles.incorrectText]}>
+                        {feedbackMessage}
+                    </Text>
+                    {timeMessage && <Text style={styles.timeMessageText}>{timeMessage}</Text>}
+                </View>
+            )}
+
+            {/* Timer Display */}
+            {targetSign && !showFeedback && (
+                <View style={styles.timerContainer}>
+                    <Text style={styles.timerText}>Time: {displayedTime}s</Text>
+                </View>
+            )}
         </View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     container: {
@@ -506,7 +723,7 @@ const styles = StyleSheet.create({
         flex: Platform.OS === 'web' ? 1 : undefined,
         padding: 20,
         height: Platform.OS === 'web' ? '100%' : 300,
-        overflow: 'auto',
+        overflow: Platform.OS === 'web' ? 'auto' : 'visible',
         minHeight: Platform.OS === 'web' ? '100%' : 300,
     },
     camera: Platform.OS === 'web' 
@@ -638,6 +855,102 @@ const styles = StyleSheet.create({
         ...typography.h3,
         color: '#4CAF50',
         marginTop: 5,
+        fontWeight: 'bold',
+    },
+    toggleButton: {
+        backgroundColor: '#2196F3',
+        padding: 12,
+        borderRadius: 8,
+        alignSelf: 'center',
+        marginTop: 10,
+    },
+    buttonText: {
+        ...typography.button,
+        color: '#fff',
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 5,
+        padding: 10,
+        borderRadius: 8,
+    },
+    switchLabel: {
+        ...typography.bodyLarge,
+        color: Platform.OS === 'web' ? '#333' : '#fff',
+        marginRight: 10,
+    },
+    cameraPreviewWeb: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+    },
+    cameraPreviewNative: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+    },
+    cameraPausedContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#000',
+    },
+    cameraPausedText: {
+        fontSize: 18,
+        color: '#888',
+    },
+    loader: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -15 }, { translateY: -15 }],
+    },
+    annotatedImage: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+    },
+    feedbackContainer: {
+        position: 'absolute',
+        bottom: 130, // Adjust as needed
+        alignSelf: 'center',
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+        alignItems: 'center',
+    },
+    feedbackText: {
+        fontSize: typography.h3.fontSize,
+        fontWeight: typography.h3.fontWeight,
+        color: '#fff',
+    },
+    correctText: {
+        color: '#4CAF50', // Green for correct
+    },
+    incorrectText: {
+        color: '#F44336', // Red for incorrect (though not used for "Correct!")
+    },
+    timeMessageText: {
+        fontSize: typography.bodyLarge.fontSize,
+        color: '#fff',
+        marginTop: 5,
+    },
+    timerContainer: {
+        position: 'absolute',
+        top: 70, // Adjust as needed, below controlsContainer
+        alignSelf: 'center',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+        zIndex: 5, // Below controls, above camera
+    },
+    timerText: {
+        fontSize: typography.bodyLarge.fontSize,
+        color: '#FFFFFF',
         fontWeight: 'bold',
     },
 }); 

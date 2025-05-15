@@ -14,8 +14,14 @@ export const NumbersSubLesson: React.FC<NumbersSubLessonProps> = ({
     onComplete
 }) => {
     const [selectedNumber, setSelectedNumber] = useState<string>('0');
+    const [learnedNumbers, setLearnedNumbers] = useState<Set<string>>(new Set());
+
     const numbers = Array.from({ length: 11 }, (_, i) => i.toString());
     const signs = getSignImages(language, numbers, 'labelled');
+
+    const handleNumberLearned = (numberStr: string) => {
+        setLearnedNumbers(prev => new Set(prev).add(numberStr.toLowerCase()));
+    };
 
     const renderNumberSelection = () => {
         return (
@@ -28,9 +34,10 @@ export const NumbersSubLesson: React.FC<NumbersSubLessonProps> = ({
                             key={item.meaning}
                             style={[
                                 styles.signItem,
-                                selectedNumber === item.meaning && styles.selectedSignItem
+                                selectedNumber === item.meaning && styles.selectedSignItem,
+                                learnedNumbers.has(item.meaning.toLowerCase()) && styles.learnedNumberCard
                             ]}
-                            onPress={() => setSelectedNumber(item.meaning || '')}
+                            onPress={() => setSelectedNumber(item.meaning || '0')}
                         >
                             <Image source={item.path} style={styles.signImage} />
                             <Text style={styles.signText}>{item.meaning}</Text>
@@ -54,10 +61,11 @@ export const NumbersSubLesson: React.FC<NumbersSubLessonProps> = ({
                             targetSign={selectedNumber}
                             onPrediction={(prediction) => {
                                 console.log('Prediction:', prediction);
-                                if (prediction === selectedNumber && onComplete) {
-                                    onComplete();
+                                if (prediction.toLowerCase() === selectedNumber.toLowerCase() && onComplete) {
+                                    // onComplete(); // Consider if onComplete has a new meaning now
                                 }
                             }}
+                            onSignLearned={handleNumberLearned}
                         />
                     </View>
                     {renderNumberSelection()}
@@ -138,6 +146,12 @@ const styles = StyleSheet.create({
     selectedSignItem: {
         backgroundColor: '#e3f2fd',
         borderColor: '#2196F3',
+        borderWidth: 2,
+    },
+    learnedNumberCard: {
+        borderColor: '#4CAF50',
+        borderWidth: 2,
+        backgroundColor: '#E8F5E9',
     },
     signImage: {
         width: '85%',

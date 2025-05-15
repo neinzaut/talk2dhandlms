@@ -15,7 +15,7 @@
  * - Accessed from ModuleScreen when selecting a sublesson
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLessons } from '../../hooks/useLessons';
@@ -24,23 +24,41 @@ import { Ionicons } from '@expo/vector-icons';
 import { SubLessonStatus, SubLesson } from '../../types/lessons';
 import { typography } from '../../constants/typography';
 import { SignRecognitionPractice } from '../(practice)/SignRecognitionPractice';
-import { getSignImages } from '../../utils/imageUtils';
+import { getSignImages, getSignImage, SignImage } from '../../utils/imageUtils';
 import { NumbersSubLesson } from './NumbersSubLesson';
 import { FingerSpellingSubLesson } from './FingerSpellingSubLesson';
 
 export const SubLessonScreen: React.FC = () => {
-    const { moduleId, sublessonId, title } = useLocalSearchParams<{ moduleId: string; sublessonId: string; title: string }>();
+    const { moduleId, sublessonId, title, language } = useLocalSearchParams<{ moduleId: string; sublessonId: string; title: string; language: string }>();
     const { selectedLanguage } = useLanguage();
-    const { lessons, loading, error } = useLessons(selectedLanguage);
+    const { lessons, loading, error, updateProgress } = useLessons(selectedLanguage as SignLanguage);
     const router = useRouter();
-    const [selectedSign, setSelectedSign] = useState<string>('A');
+    const hasMountedRef = useRef(false);
+    const [selectedSign, setSelectedSign] = useState<string | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [modalSign, setModalSign] = useState<SignImage | null>(null);
+
+    // State for learned signs
+    const [learnedSigns, setLearnedSigns] = useState<Set<string>>(new Set());
 
     // Check if the module belongs to the selected language
     const isCorrectLanguage = moduleId.toLowerCase().startsWith(selectedLanguage.toLowerCase());
 
     useEffect(() => {
         // If the language doesn't match, redirect to the dashboard
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            // On initial mount, if language is incorrect, let the component render the warning message
+            // instead of an immediate redirect that might race with router initialization.
+            if (!isCorrectLanguage) {
+                console.log("[SubLessonScreen] Initial mount with incorrect language. Deferring redirect, user will see warning.");
+                return; 
+            }
+        }
+
+        // For subsequent changes or if correct on initial valid run
         if (!isCorrectLanguage) {
+            console.log("[SubLessonScreen] Incorrect language detected after mount, redirecting to dashboard.");
             router.replace('/');
         }
     }, [isCorrectLanguage, router]);
@@ -116,10 +134,11 @@ export const SubLessonScreen: React.FC = () => {
                         <TouchableOpacity
                             key={item.meaning}
                             style={[
-                                styles.signItem,
-                                selectedSign === item.meaning && styles.selectedSignItem
+                                styles.signCard,
+                                selectedSign === item.meaning && styles.selectedSignCard,
+                                learnedSigns.has(item.meaning.toLowerCase()) && styles.learnedSignCard
                             ]}
-                            onPress={() => setSelectedSign(item.meaning || '')}
+                            onPress={() => setSelectedSign(item.meaning || null)}
                         >
                             <Image source={item.path} style={styles.signImage} />
                             <Text style={styles.signText}>{item.meaning}</Text>
@@ -176,6 +195,9 @@ export const SubLessonScreen: React.FC = () => {
                             onPrediction={(prediction) => {
                                 console.log('Prediction:', prediction);
                             }}
+                            onSignLearned={(sign) => {
+                                handleSignLearned(sign);
+                            }}
                         />
                     </View>
                     {renderSignSelection()}
@@ -188,6 +210,13 @@ export const SubLessonScreen: React.FC = () => {
                 <Text>Unsupported sublesson type</Text>
             </View>
         );
+    };
+
+    // Callback for when a sign is learned
+    const handleSignLearned = (sign: string) => {
+        setLearnedSigns(prev => new Set(prev).add(sign.toLowerCase()));
+        // Optionally, you could also update overall progress here if needed
+        // updateProgress(moduleId, sublessonId, 100, 'complete'); // Example, adjust logic
     };
 
     return (
@@ -297,7 +326,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         gap: 15,
     },
-    signItem: {
+    signCard: {
         width: '8%',
         aspectRatio: 0.8,
         alignItems: 'center',
@@ -307,15 +336,19 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#dee2e6',
     },
-    selectedSignItem: {
-        backgroundColor: '#e3f2fd',
-        borderColor: '#2196F3',
+    selectedSignCard: {
+        borderColor: '#007AFF',
+        borderWidth: 2,
+    },
+    learnedSignCard: {
+        borderColor: '#4CAF50',
+        borderWidth: 2,
+        backgroundColor: '#E8F5E9',
     },
     signImage: {
-        width: '85%',
-        height: '70%',
-        marginBottom: 4,
-        resizeMode: 'contain',
+        width: 40,
+        height: 40,
+        marginBottom: 5,
     },
     signText: {
         ...typography.bodyMedium,
